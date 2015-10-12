@@ -115,9 +115,11 @@ struct method_t {
     };
 };
 
+// TODO(yln): find and verify all usages (where do we initialize the HMAC?)
 typedef struct method_list_t {
     uint32_t entsize_NEVER_USE;  // high bits used for fixup markers
     uint32_t count;
+    // TODO(yln): add HMAC here
     method_t first;
 
     uint32_t getEntsize() const { 

@@ -894,6 +894,7 @@ static BOOL isMethodListFixedUp(const method_list_t *mlist)
     return (mlist->entsize_NEVER_USE & 3) == fixed_up_method_list;
 }
 
+// TODO(yln): method list modified
 static void setMethodListFixedUp(method_list_t *mlist)
 {
     rwlock_assert_writing(&runtimeLock);
@@ -937,6 +938,7 @@ static uint32_t method_list_count(const method_list_t *mlist)
     return mlist ? mlist->count : 0;
 }
 
+// TODO(yln): method list modified
 static void method_list_swap(method_list_t *mlist, uint32_t i, uint32_t j)
 {
     size_t entsize = method_list_entsize(mlist);
@@ -1242,6 +1244,7 @@ static BOOL isBundleClass(class_t *cls)
 }
 
 
+// TODO(yln): method list modified
 static method_list_t *
 fixupMethodList(method_list_t *mlist, bool bundleCopy, bool sort)
 {
@@ -1578,6 +1581,8 @@ static void methodizeClass(class_t *cls)
         _objc_inform("CLASS: methodizing class '%s' %s", 
                      getName(cls), isMeta ? "(meta)" : "");
     }
+    
+    // TODO(yln): Initialize method lists?
     
     // Build method and protocol and property lists.
     // Include methods and protocols and properties from categories, if any
@@ -4201,6 +4206,7 @@ protocol_addProtocol(Protocol *proto_gen, Protocol *addition_gen)
 * Adds a method to a protocol. The protocol must be under construction.
 * Locking: acquires runtimeLock
 **********************************************************************/
+// TODO(yln): method list modified
 static void
 _protocol_addMethod(method_list_t **list, SEL name, const char *types)
 {
@@ -4983,6 +4989,8 @@ static method_t *search_method_list(const method_list_t *mlist, SEL sel)
     return NULL;
 }
 
+// TODO(yln): verify that all method lookups funnel through this method.
+
 static method_t *
 getMethodNoSuper_nolock(class_t *cls, SEL sel)
 {
@@ -4992,6 +5000,8 @@ getMethodNoSuper_nolock(class_t *cls, SEL sel)
     // fixme nil cls? 
     // fixme NULL sel?
 
+    // TODO(yln): check integrity of method list here
+    
     FOREACH_METHOD_LIST(mlist, cls, {
         method_t *m = search_method_list(mlist, sel);
         if (m) return m;
@@ -5706,6 +5716,7 @@ BOOL class_conformsToProtocol(Class cls_gen, Protocol *proto_gen)
 * fixme
 * Locking: runtimeLock must be held by the caller
 **********************************************************************/
+// TODO(yln): method list modified
 static IMP 
 addMethod(class_t *cls, SEL name, IMP imp, const char *types, BOOL replace)
 {
