@@ -1,5 +1,5 @@
 //
-//  objc-hmac.m
+//  objc-hmac.mm
 //  objc
 //
 //  Created by Julian Lettner on 10/7/15.
