@@ -13,6 +13,6 @@
 #include <stdint.h>
 
 // cls points to struct class_t
-uint32_t hmacByClass(const void* ptr, size_t size, const void* cls);
+extern uint32_t hmacByClass(const void* ptr, size_t size, const void* cls);
 
 #endif /* objc_hmac_h */
