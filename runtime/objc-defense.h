@@ -9,10 +9,9 @@
 #ifndef objc_defense_h
 #define objc_defense_h
 
-#include <unordered_map>
+#include <stddef.h>
 
-typedef struct method_list method_list_t;
-
-extern std::unordered_map<method_list_t*, uint32_t> hashes;
+extern void updateHMAC(const void* ptr, size_t size, const void* cls);
+extern void verifyHMAC(const void* ptr, size_t size, const void* cls);
 
 #endif /* objc_defense_h */

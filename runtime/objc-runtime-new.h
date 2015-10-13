@@ -115,11 +115,13 @@ struct method_t {
     };
 };
 
+
+#include "objc-defense.h"
+
 // TODO(yln): find and verify all usages (where do we initialize the HMAC?)
 typedef struct method_list_t {
     uint32_t entsize_NEVER_USE;  // high bits used for fixup markers
     uint32_t count;
-    // TODO(yln): add HMAC here
     method_t first;
 
     uint32_t getEntsize() const { 
@@ -130,6 +132,16 @@ typedef struct method_list_t {
     }
     method_t& get(uint32_t i) const { 
         return *(method_t *)((uint8_t *)&first + i*getEntsize()); 
+    }
+    
+    size_t getByteSize() const {
+        return 8 + count * sizeof(method_t);
+    }
+    void protect(const class_t* cls) const {
+        updateHMAC(this, getByteSize(), cls);
+    }
+    void verify_(const class_t* cls) const {
+        verifyHMAC(this, getByteSize(), cls);
     }
 
     // iterate methods, taking entsize into account
