@@ -18,3 +18,8 @@ uint64_t combineHMAC(uint64_t h1, uint64_t h2, const void* cls) {
     // TODO(yln)
     return h1 + h2;
 }
+
+uint64_t combineHMAC(uint64_t h1, uint64_t h2, uint64_t h3, const void* cls) {
+    // TODO(yln)
+    return h1 + h2 + h3;
+}

@@ -132,15 +132,10 @@ typedef struct method_list_t {
     method_t& get(uint32_t i) const { 
         return *(method_t *)((uint8_t *)&first + i*getEntsize()); 
     }
-    
-    size_t getByteSize() const {
-        return 8 + count * sizeof(method_t);
-    }
-    void protect(const class_t* cls) const {
-//        updateHMAC(this, getByteSize(), cls);
-    }
-    void verify_(const class_t* cls) const {
-//        verifyHMAC(this, getByteSize(), cls);
+
+    uint64_t computeHash(const class_t* cls) const {
+        size_t size = 8 + count * sizeof(method_t);
+        return computeHMAC(this, size, cls);
     }
 
     // iterate methods, taking entsize into account
@@ -311,6 +306,15 @@ typedef struct class_rw_t {
 
     struct class_t *firstSubclass;
     struct class_t *nextSiblingClass;
+    
+    uint64_t computeHash(const class_t* cls) const {
+        uint64_t h1 = computeHMAC(this, sizeof(class_rw_t), cls);
+        if(flags & RW_METHOD_ARRAY)
+            printf("YES ");
+        // TODO(yln): method lists
+        uint64_t h2 = 9;
+        return combineHMAC(h1, h2, cls);
+    }
 } class_rw_t;
 
 typedef struct class_t {
@@ -324,13 +328,14 @@ typedef struct class_t {
     uintptr_t data_NEVER_USE;  // class_rw_t * plus custom rr/alloc flags
     
     // Other idea: make this non-const and set hash to 0 before computing, assign again in verify
+    // to save the two separate computeHMAC and on combination step.
     uint64_t computeHash() const {
         size_t size1 = 3 * 8; // isa, superclass, cache
         size_t size2 = 1 * 8; // data_NEVER_USE
         uint64_t h1 = computeHMAC(this, size1, this);
         uint64_t h2 = computeHMAC(this + size1 + 8, size2, this);
-        // TODO(yln): other data / method lists
-        return combineHMAC(h1, h2, this);
+        uint64_t h3 = data()->computeHash(this);
+        return combineHMAC(h1, h2, h3, this);
     }
     void protect() {
         hash = computeHash();
