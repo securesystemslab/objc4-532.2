@@ -14,18 +14,18 @@
 static std::unordered_map<const void*, uint32_t> hashes;
 
 static void abort(const void* ptr, const void* cls) {
-    std::cerr << "Found corrupted structure " << ptr << " in class " << cls;
+    std::cerr << "Found corrupted structure " << ptr << " related to class " << cls;
     std::cerr << "\nAborting!\n";
     abort();
 }
 
 static uint32_t computeHMAC(const void* ptr, size_t size, const void* cls) {
-    return 7;
+    return 7; // TODO(yln)
 }
 
 void updateHMAC(const void* ptr, size_t size, const void* cls) {
     uint32_t hash = computeHMAC(ptr, size, cls);
-    hashes[ptr] = hash;
+    //hashes[ptr] = 7; // TODO(yln) does not work!
 }
 
 void verifyHMAC(const void* ptr, size_t size, const void* cls) {

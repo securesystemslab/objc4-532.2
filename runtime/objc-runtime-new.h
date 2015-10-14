@@ -24,7 +24,7 @@
 #ifndef _OBJC_RUNTIME_NEW_H
 #define _OBJC_RUNTIME_NEW_H
 
-#include <iostream>
+#include "objc-defense.h"
 
 __BEGIN_DECLS
 
@@ -116,9 +116,6 @@ struct method_t {
         { return lhs.name < rhs.name; }
     };
 };
-
-
-#include "objc-defense.h"
 
 // TODO(yln): find and verify all usages (where do we initialize the HMAC?)
 typedef struct method_list_t {
@@ -323,19 +320,13 @@ typedef struct class_t {
     IMP *vtable;
     uintptr_t data_NEVER_USE;  // class_rw_t * plus custom rr/alloc flags
     
-    uint32_t hash;
-    
-    uint32_t computeHash() const {
-        return 7; // TODO(yln)
-    }
     void protect() {
-        hash = computeHash();
+        updateHMAC(this, sizeof(class_t), this);
+        // TODO(yln): other data / method lists
     }
     void verify_() const {
-        if (hash != computeHash()) {
-            std::cerr << "Found corrupted class " << this << ". Aborting...\n";
-            abort();
-        }
+        verifyHMAC(this, sizeof(class_t), this);
+        // TODO(yln): other data / method lists
     }
 
     class_rw_t *data() const { 
