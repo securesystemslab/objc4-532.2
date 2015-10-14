@@ -159,6 +159,7 @@
 #include "objc-private.h"
 #include "objc-abi.h"
 #include "objc-auto.h"
+#include "objc-runtime-new.h"
 #include <objc/message.h>
 
 
@@ -969,6 +970,9 @@ IMP lookUpMethod(Class cls, SEL sel, BOOL initialize, BOOL cache, id inst)
     methodPC = _cache_getImp(cls, sel);
     if (methodPC) goto done;
 
+    // [coop-defense]: check integrity before using metadata
+    ((class_t*) cls)->verify_();
+    
     // Try this class's method lists.
 
     meth = _class_getMethodNoSuper_nolock(cls, sel);
