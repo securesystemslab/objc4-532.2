@@ -317,16 +317,24 @@ typedef struct class_t {
     struct class_t *isa;
     struct class_t *superclass;
     Cache cache;
-    IMP *vtable;
+    union {
+        IMP *vtable;
+        uint64_t hash;
+    };
     uintptr_t data_NEVER_USE;  // class_rw_t * plus custom rr/alloc flags
     
-    void protect() {
-        updateHMAC(this, sizeof(class_t), this);
+    uint64_t computeHash() const {
+        return 7;
         // TODO(yln): other data / method lists
     }
+    void protect() {
+        hash = computeHash();
+    }
     void verify_() const {
-        verifyHMAC(this, sizeof(class_t), this);
-        // TODO(yln): other data / method lists
+        if (hash != computeHash()) {
+            fprintf(stderr, "Found corrupted class at %p, hash: %llu\n", this, hash);
+            abort();
+        }
     }
 
     class_rw_t *data() const { 
