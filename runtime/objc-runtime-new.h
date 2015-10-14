@@ -309,10 +309,21 @@ typedef struct class_rw_t {
     
     uint64_t computeHash(const class_t* cls) const {
         uint64_t h1 = computeHMAC(this, sizeof(class_rw_t), cls);
-        if(flags & RW_METHOD_ARRAY)
-            printf("YES ");
-        // TODO(yln): method lists
-        uint64_t h2 = 9;
+        // TODO(andrei): also include class_ro_t in hash?
+        uint64_t h2 = 0;
+        if (method_list != nullptr) {
+            if (flags & RW_METHOD_ARRAY) {
+                for (int i = 0; method_lists[i] != nullptr; i++) {
+                    uint64_t tmp = method_lists[i]->computeHash(cls);
+                    h2 = combineHMAC(h2, tmp, cls);
+                }
+            } else {
+                h2 = method_list->computeHash(cls);
+            }
+            printf("%p YEAH\n", cls);
+        } else {
+            printf("%p has no method list\n", cls);
+        }
         return combineHMAC(h1, h2, cls);
     }
 } class_rw_t;
@@ -332,6 +343,7 @@ typedef struct class_t {
     uint64_t computeHash() const {
         size_t size1 = 3 * 8; // isa, superclass, cache
         size_t size2 = 1 * 8; // data_NEVER_USE
+        assert(size1 + 8 + size2 == sizeof(class_t));
         uint64_t h1 = computeHMAC(this, size1, this);
         uint64_t h2 = computeHMAC(this + size1 + 8, size2, this);
         uint64_t h3 = data()->computeHash(this);
