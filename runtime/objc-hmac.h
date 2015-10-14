@@ -13,6 +13,9 @@
 #include <stdint.h>
 
 // cls points to struct class_t
-extern uint32_t hmacByClass(const void* ptr, size_t size, const void* cls);
+extern uint64_t computeHMAC(const void* ptr, size_t size, const void* cls);
+
+// TODO(yln): this approach might be too slow
+extern uint64_t combineHMAC(uint64_t h1, uint64_t h2, const void* cls);
 
 #endif /* objc_hmac_h */

@@ -24,7 +24,7 @@
 #ifndef _OBJC_RUNTIME_NEW_H
 #define _OBJC_RUNTIME_NEW_H
 
-#include "objc-defense.h"
+#include "objc-hmac.h"
 
 __BEGIN_DECLS
 
@@ -137,10 +137,10 @@ typedef struct method_list_t {
         return 8 + count * sizeof(method_t);
     }
     void protect(const class_t* cls) const {
-        updateHMAC(this, getByteSize(), cls);
+//        updateHMAC(this, getByteSize(), cls);
     }
     void verify_(const class_t* cls) const {
-        verifyHMAC(this, getByteSize(), cls);
+//        verifyHMAC(this, getByteSize(), cls);
     }
 
     // iterate methods, taking entsize into account
@@ -323,9 +323,14 @@ typedef struct class_t {
     };
     uintptr_t data_NEVER_USE;  // class_rw_t * plus custom rr/alloc flags
     
+    // Other idea: make this non-const and set hash to 0 before computing, assign again in verify
     uint64_t computeHash() const {
-        return 7;
+        size_t size1 = 3 * 8; // isa, superclass, cache
+        size_t size2 = 1 * 8; // data_NEVER_USE
+        uint64_t h1 = computeHMAC(this, size1, this);
+        uint64_t h2 = computeHMAC(this + size1 + 8, size2, this);
         // TODO(yln): other data / method lists
+        return combineHMAC(h1, h2, this);
     }
     void protect() {
         hash = computeHash();
