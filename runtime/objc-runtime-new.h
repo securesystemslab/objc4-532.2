@@ -24,6 +24,8 @@
 #ifndef _OBJC_RUNTIME_NEW_H
 #define _OBJC_RUNTIME_NEW_H
 
+#include <iostream>
+
 __BEGIN_DECLS
 
 // We cannot store flags in the low bits of the 'data' field until we work with
@@ -320,6 +322,21 @@ typedef struct class_t {
     Cache cache;
     IMP *vtable;
     uintptr_t data_NEVER_USE;  // class_rw_t * plus custom rr/alloc flags
+    
+    uint32_t hash;
+    
+    uint32_t computeHash() const {
+        return 7; // TODO(yln)
+    }
+    void protect() {
+        hash = computeHash();
+    }
+    void verify_() const {
+        if (hash != computeHash()) {
+            std::cerr << "Found corrupted class " << this << ". Aborting...\n";
+            abort();
+        }
+    }
 
     class_rw_t *data() const { 
         return (class_rw_t *)(data_NEVER_USE & ~(uintptr_t)3); 
