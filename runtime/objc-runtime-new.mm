@@ -3031,6 +3031,7 @@ void _read_images(header_info **hList, uint32_t hCount)
                 newCls->setData(rw);
                 
                 addRemappedClass(cls, newCls);
+                //TODO(yln): maybe protect here?
                 cls = newCls;
 
                 // Non-lazily realize the class below.

@@ -309,7 +309,6 @@ typedef struct class_rw_t {
     
     uint64_t computeHash(const class_t* cls) const {
         uint64_t h1 = computeHMAC(this, sizeof(class_rw_t), cls);
-        // TODO(andrei): also include class_ro_t in hash?
         uint64_t h2 = 0;
         if (method_list != nullptr) {
             if (flags & RW_METHOD_ARRAY) {
@@ -338,15 +337,14 @@ typedef struct class_t {
     };
     uintptr_t data_NEVER_USE;  // class_rw_t * plus custom rr/alloc flags
     
-    // Other idea: make this non-const and set hash to 0 before computing, assign again in verify
-    // to save the two separate computeHMAC and on combination step.
     uint64_t computeHash() const {
-        size_t size1 = 3 * 8; // isa, superclass, cache
-        size_t size2 = 1 * 8; // data_NEVER_USE
-        assert(size1 + 8 + size2 == sizeof(class_t));
-        uint64_t h1 = computeHMAC(this, size1, this);
-        uint64_t h2 = computeHMAC(this + size1 + 8, size2, this);
-        uint64_t h3 = data()->computeHash(this);
+        uint64_t h1 = (uint64_t) this;
+        uint64_t h2 = (uint64_t) superclass;
+        // Idea: mask flags so only materialized (and other metadata-altering bits) matter
+//        uint64_t h3 = (uint64_t) data()->flags; // works for class_rw_t and class_ro_t
+        uint64_t h3 = 77;
+        // TODO(yln): Include method lists.
+        //TODO(yln): add this pointer to hash!
         return combineHMAC(h1, h2, h3, this);
     }
     void protect() {
