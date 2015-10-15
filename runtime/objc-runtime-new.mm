@@ -2685,7 +2685,7 @@ static class_t *realizeClass(class_t *cls)
         addRealizedMetaclass(cls);
     }
 
-    // [coop-defense]: update hash
+    // [coop-defense]: update hash after realizing
     cls->protect();
     
     return cls;
