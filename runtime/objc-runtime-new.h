@@ -117,7 +117,6 @@ struct method_t {
     };
 };
 
-// TODO(yln): find and verify all usages (where do we initialize the HMAC?)
 typedef struct method_list_t {
     uint32_t entsize_NEVER_USE;  // high bits used for fixup markers
     uint32_t count;
@@ -134,7 +133,8 @@ typedef struct method_list_t {
     }
 
     uint64_t computeHash(const class_t* cls) const {
-        size_t size = 8 + count * sizeof(method_t);
+        assert(2*4 + sizeof(method_t) == sizeof(method_list_t));
+        size_t size = 2 * 4 + count * sizeof(method_t);
         return computeHMAC(this, size, cls);
     }
 
@@ -289,6 +289,11 @@ typedef struct class_ro_t {
 
     const uint8_t * weakIvarLayout;
     const property_list_t *baseProperties;
+    
+    uint64_t computeHash(const class_t* cls) const {
+        return (baseMethods != nullptr) ? baseMethods->computeHash(cls) : 0;
+    }
+    
 } class_ro_t;
 
 typedef struct class_rw_t {
@@ -308,23 +313,18 @@ typedef struct class_rw_t {
     struct class_t *nextSiblingClass;
     
     uint64_t computeHash(const class_t* cls) const {
-        return 7;
-//        uint64_t h1 = computeHMAC(this, sizeof(class_rw_t), cls);
-//        uint64_t h2 = 0;
-//        if (method_list != nullptr) {
-//            if (flags & RW_METHOD_ARRAY) {
-//                for (int i = 0; method_lists[i] != nullptr; i++) {
-//                    uint64_t tmp = method_lists[i]->computeHash(cls);
-//                    h2 = combineHMAC(h2, tmp, cls);
-//                }
-//            } else {
-//                h2 = method_list->computeHash(cls);
-//            }
-////            printf("%p YEAH\n", cls);
-//        } else {
-////            printf("%p has no method list\n", cls);
-//        }
-//        return combineHMAC(h1, h2, cls);
+        if (method_list == nullptr)
+            return 0;
+        
+        if (!(flags & RW_METHOD_ARRAY))
+            return method_list->computeHash(cls);
+        
+        uint64_t h = 0;
+        for (int i = 0; method_lists[i] != nullptr; i++) {
+            uint64_t tmp = method_lists[i]->computeHash(cls);
+            h = combineHMAC(h, tmp, cls);
+        }
+        return h;
     }
 } class_rw_t;
 
@@ -343,11 +343,16 @@ typedef struct class_t {
         h[0] = (uint64_t) this;
         h[1] = (uint64_t) isa;
         h[2] = (uint64_t) superclass;
-        h[3] = 0;
-        h[4] = 0;
-//        uint64_t h3 = data()->flags; // works for class_rw_t and class_ro_t
-        uint64_t h4 = 77;
-        // TODO(yln): Include method lists.
+        
+        uint32_t flags = data()->flags; // works for class_rw_t and class_ro_t
+        h[3] = flags;
+        
+        if (flags & RW_REALIZED || flags & RW_FUTURE) { // class_rw_t
+            h[4] = data()->computeHash(this);
+        } else { // class_ro_t
+            h[4] = ((class_ro_t*) data())->computeHash(this);
+        }
+        
         return combineHMAC(h, 5, this);
     }
     void protect() {
