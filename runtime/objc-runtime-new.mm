@@ -6835,7 +6835,8 @@ _objc_fixupMessageRef(id obj, struct objc_super2 *supr, message_ref_t *msg)
 
     if (ignoreSelector(msg->sel)) {
         // ignored selector - bypass dispatcher
-        msg->imp = (IMP)&vtable_ignored;
+//        msg->imp = (IMP)&vtable_ignored; // [coop-defense]: commented out to make compile
+        assert(false); // should not reach here
         imp = (IMP)&_objc_ignored_method;
     }
 #if SUPPORT_VTABLE
