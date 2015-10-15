@@ -308,22 +308,23 @@ typedef struct class_rw_t {
     struct class_t *nextSiblingClass;
     
     uint64_t computeHash(const class_t* cls) const {
-        uint64_t h1 = computeHMAC(this, sizeof(class_rw_t), cls);
-        uint64_t h2 = 0;
-        if (method_list != nullptr) {
-            if (flags & RW_METHOD_ARRAY) {
-                for (int i = 0; method_lists[i] != nullptr; i++) {
-                    uint64_t tmp = method_lists[i]->computeHash(cls);
-                    h2 = combineHMAC(h2, tmp, cls);
-                }
-            } else {
-                h2 = method_list->computeHash(cls);
-            }
-            printf("%p YEAH\n", cls);
-        } else {
-            printf("%p has no method list\n", cls);
-        }
-        return combineHMAC(h1, h2, cls);
+        return 7;
+//        uint64_t h1 = computeHMAC(this, sizeof(class_rw_t), cls);
+//        uint64_t h2 = 0;
+//        if (method_list != nullptr) {
+//            if (flags & RW_METHOD_ARRAY) {
+//                for (int i = 0; method_lists[i] != nullptr; i++) {
+//                    uint64_t tmp = method_lists[i]->computeHash(cls);
+//                    h2 = combineHMAC(h2, tmp, cls);
+//                }
+//            } else {
+//                h2 = method_list->computeHash(cls);
+//            }
+////            printf("%p YEAH\n", cls);
+//        } else {
+////            printf("%p has no method list\n", cls);
+//        }
+//        return combineHMAC(h1, h2, cls);
     }
 } class_rw_t;
 
@@ -338,14 +339,16 @@ typedef struct class_t {
     uintptr_t data_NEVER_USE;  // class_rw_t * plus custom rr/alloc flags
     
     uint64_t computeHash() const {
-        uint64_t h1 = (uint64_t) this;
-        uint64_t h2 = (uint64_t) superclass;
-        // Idea: mask flags so only materialized (and other metadata-altering bits) matter
-//        uint64_t h3 = (uint64_t) data()->flags; // works for class_rw_t and class_ro_t
-        uint64_t h3 = 77;
+        uint64_t h[5];
+        h[0] = (uint64_t) this;
+        h[1] = (uint64_t) isa;
+        h[2] = (uint64_t) superclass;
+        h[3] = 0;
+        h[4] = 0;
+//        uint64_t h3 = data()->flags; // works for class_rw_t and class_ro_t
+        uint64_t h4 = 77;
         // TODO(yln): Include method lists.
-        //TODO(yln): add this pointer to hash!
-        return combineHMAC(h1, h2, h3, this);
+        return combineHMAC(h, 5, this);
     }
     void protect() {
         hash = computeHash();

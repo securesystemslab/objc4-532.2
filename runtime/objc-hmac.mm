@@ -14,12 +14,11 @@ uint64_t computeHMAC(const void* ptr, size_t size, const void* cls) {
     return 7;
 }
 
-uint64_t combineHMAC(uint64_t h1, uint64_t h2, const void* cls) {
+uint64_t combineHMAC(uint64_t* elements, size_t count, const void* cls) {
     // TODO(yln)
-    return h1 + h2;
-}
-
-uint64_t combineHMAC(uint64_t h1, uint64_t h2, uint64_t h3, const void* cls) {
-    // TODO(yln)
-    return h1 + h2 + h3;
+    uint64_t x = 0;
+    for (size_t i = 0; i < count; ++i) {
+        x += elements[i];
+    }
+    return x;
 }
