@@ -1016,8 +1016,6 @@ IMP lookUpMethod(Class cls, SEL sel, BOOL initialize, BOOL cache, id inst)
 
     if (!triedResolver) {
         unlockForMethodLookup();
-        // TODO(yln): verify that we don't have to pretect this explicitly
-        // Assumption: everything funnels through 'getMethodNoSuper_nolock'
         _class_resolveMethod(cls, sel);
         // Don't cache the result; we don't hold the lock so it may have 
         // changed already. Re-do the search from scratch instead.
