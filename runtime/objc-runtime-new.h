@@ -360,7 +360,9 @@ typedef struct class_t {
     }
     void verify_() const {
         if (hash != computeHash()) {
-            fprintf(stderr, "Found corrupted class at %p, hash: %llu\n", this, hash);
+            fprintf(stderr,
+                    "Found corrupted class '%s' at %p, hash: %llu\n",
+                    data()->ro->name, this, hash);
             abort();
         }
     }
