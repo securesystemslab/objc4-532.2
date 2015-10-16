@@ -3260,7 +3260,7 @@ void _read_images(header_info **hList, uint32_t hCount)
     if (DebugNonFragileIvars) {
         realizeAllClasses();
     }
-    realizeAllClasses(); // TODO(yln): remove to make lazy again
+//    realizeAllClasses(); // TODO(yln): remove to make lazy again
 
 #undef EACH_HEADER
 }
