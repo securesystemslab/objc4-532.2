@@ -2682,7 +2682,7 @@ static class_t *realizeClass(class_t *cls)
 
     // [coop-defense]: update hash after realizing
     cls->protect();
-    
+
     return cls;
 }
 
@@ -4996,7 +4996,7 @@ getMethodNoSuper_nolock(class_t *cls, SEL sel)
     assert(isRealized(cls));
     // fixme nil cls? 
     // fixme NULL sel?
-    
+
     FOREACH_METHOD_LIST(mlist, cls, {
         method_t *m = search_method_list(mlist, sel);
         if (m) return m;

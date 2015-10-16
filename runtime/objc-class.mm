@@ -946,7 +946,7 @@ IMP lookUpMethod(Class cls, SEL sel, BOOL initialize, BOOL cache, id inst)
         methodPC = _cache_getImp(cls, sel);
         if (methodPC) return methodPC;    
     }
-    
+
     // [coop-defense]: check integrity before using/modifying any metadata
     ((class_t*) cls)->verify_();
 
@@ -972,7 +972,7 @@ IMP lookUpMethod(Class cls, SEL sel, BOOL initialize, BOOL cache, id inst)
 
     methodPC = _cache_getImp(cls, sel);
     if (methodPC) goto done;
-    
+
     // Try this class's method lists.
 
     meth = _class_getMethodNoSuper_nolock(cls, sel);

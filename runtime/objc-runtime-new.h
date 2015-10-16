@@ -289,11 +289,11 @@ typedef struct class_ro_t {
 
     const uint8_t * weakIvarLayout;
     const property_list_t *baseProperties;
-    
+
     uint64_t computeHash(const class_t* cls) const {
         return (baseMethods != nullptr) ? baseMethods->computeHash(cls) : 0;
     }
-    
+
 } class_ro_t;
 
 typedef struct class_rw_t {
@@ -311,14 +311,14 @@ typedef struct class_rw_t {
 
     struct class_t *firstSubclass;
     struct class_t *nextSiblingClass;
-    
+
     uint64_t computeHash(const class_t* cls) const {
         if (method_list == nullptr)
             return 0;
-        
+
         if (!(flags & RW_METHOD_ARRAY))
             return method_list->computeHash(cls);
-        
+
         uint64_t h = 0;
         for (int i = 0; method_lists[i] != nullptr; i++) {
             uint64_t tmp = method_lists[i]->computeHash(cls);
@@ -337,30 +337,30 @@ typedef struct class_t {
         uint64_t hash;
     };
     uintptr_t data_NEVER_USE;  // class_rw_t * plus custom rr/alloc flags
-    
+
     uint64_t computeHash() const {
         uint64_t h[5];
         h[0] = (uint64_t) this;
         h[1] = (uint64_t) isa;
 //        h[2] = (uint64_t) superclass; // TODO(yln): doesn't work yet! :/
         h[2] = 0;
-        
+
         // investigate if this can ever be null if not "in-between" operations
         if (data() == nullptr) {
             printf("data() is null\n");
             return 77;
         }
-        
+
         uint32_t flags = data()->flags; // works for class_rw_t and class_ro_t
 //        h[3] = flags; // TODO(yln): doesn't work yet!
         h[3] = 0;
-        
+
         if (flags & RW_REALIZED || flags & RW_FUTURE) { // class_rw_t
             h[4] = data()->computeHash(this);
         } else { // class_ro_t
             h[4] = ((class_ro_t*) data())->computeHash(this);
         }
-        
+
         return combineHMAC(h, 5, this);
     }
     void protect() {
