@@ -328,6 +328,9 @@ typedef struct class_rw_t {
     }
 } class_rw_t;
 
+// TODO(yln): remove me after debugging
+static void printBits(int s,void* p){int i,j;for(i=s-1;i>=0;i--)for(j=7;j>=0;j--)printf("%u",(*((unsigned char*)p+i)&(1<<j))>>j);puts("");}
+
 typedef struct class_t {
     struct class_t *isa;
     struct class_t *superclass;
@@ -342,18 +345,16 @@ typedef struct class_t {
         uint64_t h[5];
         h[0] = (uint64_t) this;
         h[1] = (uint64_t) isa;
-//        h[2] = (uint64_t) superclass; // TODO(yln): doesn't work yet! :/
-        h[2] = 0;
+        h[2] = (uint64_t) superclass;
         
-        // investigate if this can ever be null if not "in-between" operations
+        // TODO(yln): investigate if this can ever be null if not "in-between" operations
         if (data() == nullptr) {
             printf("data() is null\n");
-            return 77;
+            return combineHMAC(h, 3, this);
         }
         
         uint32_t flags = data()->flags; // works for class_rw_t and class_ro_t
-//        h[3] = flags; // TODO(yln): doesn't work yet!
-        h[3] = 0;
+        h[3] = (uint64_t) flags;
         
         if (flags & RW_REALIZED || flags & RW_FUTURE) { // class_rw_t
             h[4] = data()->computeHash(this);
@@ -373,6 +374,9 @@ typedef struct class_t {
             fprintf(stderr,
                     "Found corrupted class '%s' at %p, hash: %llu\n",
                     data()->ro->name, this, hash);
+            printf("class flags: ");
+            printBits(sizeof(data()->flags), &data()->flags);
+            printf("\n");
             abort();
         }
     }
@@ -383,7 +387,7 @@ typedef struct class_t {
     void setData(class_rw_t *newData) {
         uintptr_t flags = (uintptr_t)data_NEVER_USE & (uintptr_t)3;
         data_NEVER_USE = (uintptr_t)newData | flags;
-        protect();
+        protect(); // [coop-defense]
     }
 
     bool hasCustomRR() const {

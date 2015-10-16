@@ -783,7 +783,7 @@ static void updateVtable(class_t *cls, BOOL force)
         }
     }
     
-    cls->protect();
+    cls->protect(); // [coop-defense]
 }
 
 // SUPPORT_VTABLE
@@ -1411,7 +1411,7 @@ attachMethodLists(class_t *cls, method_list_t **addedLists, int addedCount,
         assert(!(cls->data()->flags & RW_METHOD_ARRAY));
     }
     
-    cls->protect();
+    cls->protect(); // [coop-defense]
 }
 
 static void 
@@ -1440,9 +1440,8 @@ attachCategoryMethods(class_t *cls, category_list *cats,
     attachMethodLists(cls, mlists, mcount, NO, fromBundle, inoutVtablesAffected);
 
     _free_internal(mlists);
-    
-    
-    cls->protect();
+
+    cls->protect(); // [coop-defense]
 }
 
 
@@ -1643,8 +1642,8 @@ static void methodizeClass(class_t *cls)
         }
     });
 #endif
-    
-    cls->protect();
+
+    cls->protect(); // [coop-defense]
 }
 
 
@@ -1715,6 +1714,8 @@ static void changeInfo(class_t *cls, unsigned int set, unsigned int clear)
         oldf = cls->data()->flags;
         newf = (oldf | set) & ~clear;
     } while (!OSAtomicCompareAndSwap32Barrier(oldf, newf, (volatile int32_t *)&cls->data()->flags));
+
+    cls->protect(); // [coop-defense]
 }
 
 
@@ -1922,6 +1923,8 @@ static void addFutureNamedClass(const char *name, class_t *cls)
 
     old = NXMapKeyCopyingInsert(futureNamedClasses(), name, cls);
     assert(!old);
+
+    cls->protect(); // [coop-defense]
 }
 
 
@@ -2555,9 +2558,6 @@ static void reconcileInstanceVariables(class_t *cls, class_t *supercls) {
                       mergeLayouts ? &ivarBitmap : NULL, mergeLayouts ? &weakBitmap : NULL);
             gdb_objc_class_changed((Class)cls, OBJC_CLASS_IVARS_CHANGED, ro->name);
             layoutsChanged = mergeLayouts;
-            
-            cls->protect();
-            supercls->protect();
         } 
         
         if (mergeLayouts) {
@@ -2593,17 +2593,14 @@ static void reconcileInstanceVariables(class_t *cls, class_t *supercls) {
             }
             ro_w->ivarLayout = layout_string_create(ivarBitmap);
             ro_w->weakIvarLayout = layout_string_create(weakBitmap);
-            
-            cls->protect();
-            supercls->protect();
         }
         
         layout_bitmap_free(ivarBitmap);
         layout_bitmap_free(weakBitmap);
+
+        supercls->protect(); // [coop-defense]
+        cls->protect(); // [coop-defense]
     }
-    
-    supercls->protect();
-    cls->protect();
 }
 
 /***********************************************************************
@@ -2697,9 +2694,8 @@ static class_t *realizeClass(class_t *cls)
         addRealizedMetaclass(cls);
     }
 
-    // [coop-defense]: update hash after realizing
-    cls->protect();
-    
+    cls->protect(); // [coop-defense]
+
     return cls;
 }
 
@@ -2791,7 +2787,7 @@ Class _objc_allocateFutureClass(const char *name)
     cls = (class_t *)_calloc_class(sizeof(*cls));
     addFutureNamedClass(name, cls);
 
-    cls->protect();
+    cls->protect(); // [coop-defense]
     rwlock_unlock_write(&runtimeLock);
     return (Class)cls;
 }
@@ -3026,6 +3022,7 @@ void _read_images(header_info **hList, uint32_t hCount)
                 }
                 addRemappedClass(cls, NULL);
                 cls->superclass = NULL;
+                cls->protect(); // [coop-defense]
                 continue;
             }
 
@@ -3044,7 +3041,7 @@ void _read_images(header_info **hList, uint32_t hCount)
                 newCls->setData(rw);
                 
                 addRemappedClass(cls, newCls);
-                cls->protect();
+                cls->protect(); // TODO(yln): probably unneccessary
                 cls = newCls;
 
                 // Non-lazily realize the class below.
@@ -3083,7 +3080,7 @@ void _read_images(header_info **hList, uint32_t hCount)
                     if (isMethodListFixedUp(mlist)) preoptimizedMethodLists++;
                 }
             }
-            cls->protect();
+            cls->protect(); // [coop-defense]
         }
     }
 
@@ -3243,6 +3240,7 @@ void _read_images(header_info **hList, uint32_t hCount)
                                  getName(cls), cat->name);
                 }
             }
+            cls->protect(); // [coop-defense]
         }
     }
 
@@ -3255,7 +3253,7 @@ void _read_images(header_info **hList, uint32_t hCount)
     if (DebugNonFragileIvars) {
         realizeAllClasses();
     }
-    realizeAllClasses();
+    realizeAllClasses(); // TODO(yln): remove to make lazy again
 
 #undef EACH_HEADER
 }
@@ -3281,7 +3279,7 @@ static void schedule_class_load(class_t *cls)
     add_class_to_loadable_list((Class)cls);
     changeInfo(cls, RW_LOADED, 0);
     
-    cls->protect();
+    cls->protect(); // [coop-defense]
 }
 
 void prepare_load_methods(header_info *hi)
@@ -5254,7 +5252,7 @@ _class_setInitializing(Class cls_gen)
     class_t *cls = newcls(_class_getMeta(cls_gen));
     changeInfo(cls, RW_INITIALIZING, 0);
     
-    cls->protect();
+    cls->protect(); // [coop-defense]
 }
 
 
@@ -5283,7 +5281,7 @@ _class_setInitialized(Class cls_gen)
 
     changeInfo(metacls, RW_INITIALIZED, RW_INITIALIZING);
     
-    cls->protect();
+    cls->protect(); // [coop-defense]
 }
 
 
@@ -5386,6 +5384,7 @@ _class_setInstancesHaveAssociatedObjects(Class cls_gen)
     class_t *cls = newcls(cls_gen);
     assert(isFuture(cls)  ||  isRealized(cls));
     changeInfo(cls, RW_INSTANCES_HAVE_ASSOCIATED_OBJECTS, 0);
+    cls->protect(); // [coop-defense]
 }
 
 
@@ -5441,6 +5440,7 @@ void class_t::setHasCustomRR(bool inherited)
         c->data()->flags |= RW_HAS_CUSTOM_RR;
 #endif
     });
+    protect(); // [coop-defense]
 }
 
 
@@ -5466,6 +5466,7 @@ void class_t::setHasCustomAWZ(bool inherited )
         c->data()->flags |= RW_HAS_CUSTOM_AWZ;
 #endif
     });
+    protect(); // [coop-defense]
 }
 
 
@@ -6385,7 +6386,9 @@ void objc_registerClassPair(Class cls_gen)
     addRealizedMetaclass(cls->isa);
     addNonMetaClass(cls);
     
+    // [coop-defense]
     cls->protect();
+    cls->isa->protect();
 
     rwlock_unlock_write(&runtimeLock);
 }
@@ -6959,6 +6962,10 @@ static class_t *setSuperclass(class_t *cls, class_t *newSuper)
     flushVtables(cls->isa);
     flushCaches(cls);
     flushVtables(cls);
+    
+    // [coop-defense]
+    cls->protect();
+    cls->isa->protect();
     
     return oldSuper;
 }
