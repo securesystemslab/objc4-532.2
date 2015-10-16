@@ -365,6 +365,7 @@ typedef struct class_t {
         return combineHMAC(h, 5, this);
     }
     void protect() {
+        if (this == nullptr) printf("protect called with null\n");
         if (this == nullptr) return; // TODO(yl): replace with assert
         hash = computeHash();
     }
