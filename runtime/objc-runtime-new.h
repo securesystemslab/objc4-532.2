@@ -342,16 +342,12 @@ typedef struct class_t {
     uintptr_t data_NEVER_USE;  // class_rw_t * plus custom rr/alloc flags
     
     uint64_t computeHash() const {
+        assert(data() != nullptr);
+
         uint64_t h[5];
         h[0] = (uint64_t) this;
         h[1] = (uint64_t) isa;
         h[2] = (uint64_t) superclass;
-        
-        // TODO(yln): investigate if this can ever be null if not "in-between" operations
-        if (data() == nullptr) {
-            printf("data() is null\n");
-            return combineHMAC(h, 3, this);
-        }
         
         uint32_t flags = data()->flags; // works for class_rw_t and class_ro_t
         h[3] = (uint64_t) flags;
