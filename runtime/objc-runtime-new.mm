@@ -2791,6 +2791,7 @@ Class _objc_allocateFutureClass(const char *name)
     cls = (class_t *)_calloc_class(sizeof(*cls));
     addFutureNamedClass(name, cls);
 
+    cls->protect();
     rwlock_unlock_write(&runtimeLock);
     return (Class)cls;
 }
@@ -6233,6 +6234,7 @@ Class objc_initializeClassPair(Class superclass_gen, const char *name, Class cls
     // just initialize what was supplied
     objc_initializeClassPair_internal(superclass_gen, name, cls_gen, meta_gen);
 
+    newcls(cls_gen)->protect();
     rwlock_unlock_write(&runtimeLock);
     return cls_gen;
 }

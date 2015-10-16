@@ -383,6 +383,7 @@ typedef struct class_t {
     void setData(class_rw_t *newData) {
         uintptr_t flags = (uintptr_t)data_NEVER_USE & (uintptr_t)3;
         data_NEVER_USE = (uintptr_t)newData | flags;
+        protect();
     }
 
     bool hasCustomRR() const {
