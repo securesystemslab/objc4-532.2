@@ -342,10 +342,18 @@ typedef struct class_t {
         uint64_t h[5];
         h[0] = (uint64_t) this;
         h[1] = (uint64_t) isa;
-        h[2] = (uint64_t) superclass;
+//        h[2] = (uint64_t) superclass; // TODO(yln): doesn't work yet! :/
+        h[2] = 0;
+        
+        // investigate if this can ever be null if not "in-between" operations
+        if (data() == nullptr) {
+            printf("data() is null\n");
+            return 77;
+        }
         
         uint32_t flags = data()->flags; // works for class_rw_t and class_ro_t
-        h[3] = flags;
+//        h[3] = flags; // TODO(yln): doesn't work yet!
+        h[3] = 0;
         
         if (flags & RW_REALIZED || flags & RW_FUTURE) { // class_rw_t
             h[4] = data()->computeHash(this);
@@ -356,9 +364,11 @@ typedef struct class_t {
         return combineHMAC(h, 5, this);
     }
     void protect() {
+        if (this == nullptr) return; // TODO(yl): replace with assert
         hash = computeHash();
     }
     void verify_() const {
+        assert(this != nullptr);
         if (hash != computeHash()) {
             fprintf(stderr,
                     "Found corrupted class '%s' at %p, hash: %llu\n",
