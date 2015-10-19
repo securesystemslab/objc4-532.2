@@ -2700,9 +2700,9 @@ static class_t *realizeClass(class_t *cls)
         addRealizedMetaclass(cls);
     }
 
-    supercls->protect(); // [coop-defense]
-    metacls->protect(); // [coop-defense]
     cls->protect(); // [coop-defense]
+    if (supercls) supercls->protect(); // [coop-defense]
+    if (metacls) metacls->protect(); // [coop-defense]
 
     return cls;
 }
@@ -3265,8 +3265,8 @@ void _read_images(header_info **hList, uint32_t hCount)
             class_t* cls = ((class_t*) classlist[i]);
             // TODO(yln): FIXME: this should really be done recursively for isa and superclass.
             cls->protect();
-            cls->isa->protect();
-            cls->superclass->protect();
+            if (cls->isa) cls->isa->protect();
+            if (cls->superclass) cls->superclass->protect();
         }
     }
 #undef EACH_HEADER
