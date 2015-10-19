@@ -41,7 +41,7 @@
 #define newprotocol(p) ((protocol_t *)p)
 #define newproperty(p) ((property_t *)p)
 
-static const char *getName(class_t *cls);
+//static const char *getName(class_t *cls);
 static uint32_t unalignedInstanceSize(class_t *cls);
 static uint32_t alignedInstanceSize(class_t *cls);
 static BOOL isMetaClass(class_t *cls);
@@ -783,7 +783,7 @@ static void updateVtable(class_t *cls, BOOL force)
         }
     }
     
-    cls->protect();
+    cls->protect(); // [coop-defense]
 }
 
 // SUPPORT_VTABLE
@@ -1411,7 +1411,7 @@ attachMethodLists(class_t *cls, method_list_t **addedLists, int addedCount,
         assert(!(cls->data()->flags & RW_METHOD_ARRAY));
     }
     
-    cls->protect();
+    cls->protect(); // [coop-defense]
 }
 
 static void 
@@ -1440,9 +1440,8 @@ attachCategoryMethods(class_t *cls, category_list *cats,
     attachMethodLists(cls, mlists, mcount, NO, fromBundle, inoutVtablesAffected);
 
     _free_internal(mlists);
-    
-    
-    cls->protect();
+
+    cls->protect(); // [coop-defense]
 }
 
 
@@ -1643,8 +1642,8 @@ static void methodizeClass(class_t *cls)
         }
     });
 #endif
-    
-    cls->protect();
+
+    cls->protect(); // [coop-defense]
 }
 
 
@@ -1715,6 +1714,8 @@ static void changeInfo(class_t *cls, unsigned int set, unsigned int clear)
         oldf = cls->data()->flags;
         newf = (oldf | set) & ~clear;
     } while (!OSAtomicCompareAndSwap32Barrier(oldf, newf, (volatile int32_t *)&cls->data()->flags));
+
+    cls->protect(); // [coop-defense]
 }
 
 
@@ -1922,6 +1923,8 @@ static void addFutureNamedClass(const char *name, class_t *cls)
 
     old = NXMapKeyCopyingInsert(futureNamedClasses(), name, cls);
     assert(!old);
+
+    cls->protect(); // [coop-defense]
 }
 
 
@@ -2240,6 +2243,9 @@ static void addSubclass(class_t *supercls, class_t *subcls)
         if (supercls->hasCustomAWZ()) {
             subcls->setHasCustomAWZ(true);
         }
+        
+        supercls->protect(); // [coop-defense]
+        subcls->protect(); // [coop-defense]
     }
 }
 
@@ -2263,6 +2269,9 @@ static void removeSubclass(class_t *supercls, class_t *subcls)
         ;
     assert(*cp == subcls);
     *cp = subcls->data()->nextSiblingClass;
+    
+    supercls->protect(); // [coop-defense]
+    subcls->protect(); // [coop-defense]
 }
 
 
@@ -2555,9 +2564,6 @@ static void reconcileInstanceVariables(class_t *cls, class_t *supercls) {
                       mergeLayouts ? &ivarBitmap : NULL, mergeLayouts ? &weakBitmap : NULL);
             gdb_objc_class_changed((Class)cls, OBJC_CLASS_IVARS_CHANGED, ro->name);
             layoutsChanged = mergeLayouts;
-            
-            cls->protect();
-            supercls->protect();
         } 
         
         if (mergeLayouts) {
@@ -2593,17 +2599,14 @@ static void reconcileInstanceVariables(class_t *cls, class_t *supercls) {
             }
             ro_w->ivarLayout = layout_string_create(ivarBitmap);
             ro_w->weakIvarLayout = layout_string_create(weakBitmap);
-            
-            cls->protect();
-            supercls->protect();
         }
         
         layout_bitmap_free(ivarBitmap);
         layout_bitmap_free(weakBitmap);
+
+        supercls->protect(); // [coop-defense]
+        cls->protect(); // [coop-defense]
     }
-    
-    supercls->protect();
-    cls->protect();
 }
 
 /***********************************************************************
@@ -2697,8 +2700,9 @@ static class_t *realizeClass(class_t *cls)
         addRealizedMetaclass(cls);
     }
 
-    // [coop-defense]: update hash after realizing
-    cls->protect();
+    supercls->protect(); // [coop-defense]
+    metacls->protect(); // [coop-defense]
+    cls->protect(); // [coop-defense]
 
     return cls;
 }
@@ -2791,6 +2795,7 @@ Class _objc_allocateFutureClass(const char *name)
     cls = (class_t *)_calloc_class(sizeof(*cls));
     addFutureNamedClass(name, cls);
 
+    cls->protect(); // [coop-defense]
     rwlock_unlock_write(&runtimeLock);
     return (Class)cls;
 }
@@ -3043,7 +3048,6 @@ void _read_images(header_info **hList, uint32_t hCount)
                 newCls->setData(rw);
                 
                 addRemappedClass(cls, newCls);
-                cls->protect();
                 cls = newCls;
 
                 // Non-lazily realize the class below.
@@ -3082,7 +3086,6 @@ void _read_images(header_info **hList, uint32_t hCount)
                     if (isMethodListFixedUp(mlist)) preoptimizedMethodLists++;
                 }
             }
-            cls->protect();
         }
     }
 
@@ -3254,8 +3257,18 @@ void _read_images(header_info **hList, uint32_t hCount)
     if (DebugNonFragileIvars) {
         realizeAllClasses();
     }
-    realizeAllClasses();
-
+    
+    // [coop-defense]: Protect all loaded classes (incl. isa and superclass)
+    for (EACH_HEADER) {
+        classref_t* classlist = _getObjc2ClassList(hi, &count);
+        for (i = 0; i < count; i++) {
+            class_t* cls = ((class_t*) classlist[i]);
+            // TODO(yln): FIXME: this should really be done recursively for isa and superclass.
+            cls->protect();
+            cls->isa->protect();
+            cls->superclass->protect();
+        }
+    }
 #undef EACH_HEADER
 }
 
@@ -3279,8 +3292,6 @@ static void schedule_class_load(class_t *cls)
 
     add_class_to_loadable_list((Class)cls);
     changeInfo(cls, RW_LOADED, 0);
-    
-    cls->protect();
 }
 
 void prepare_load_methods(header_info *hi)
@@ -4926,7 +4937,8 @@ const char *_class_getName(Class cls)
 * fixme
 * Locking: runtimeLock must be held by the caller
 **********************************************************************/
-static const char *
+//static const char * // Changed by yln
+const char *
 getName(class_t *cls)
 {
     // fixme hack rwlock_assert_writing(&runtimeLock);
@@ -5017,7 +5029,7 @@ getMethodNoSuper_nolock(class_t *cls, SEL sel)
     assert(isRealized(cls));
     // fixme nil cls? 
     // fixme NULL sel?
-
+    
     FOREACH_METHOD_LIST(mlist, cls, {
         method_t *m = search_method_list(mlist, sel);
         if (m) return m;
@@ -5252,8 +5264,6 @@ _class_setInitializing(Class cls_gen)
     assert(!_class_isMetaClass(cls_gen));
     class_t *cls = newcls(_class_getMeta(cls_gen));
     changeInfo(cls, RW_INITIALIZING, 0);
-    
-    cls->protect();
 }
 
 
@@ -5281,8 +5291,6 @@ _class_setInitialized(Class cls_gen)
     rwlock_unlock_write(&runtimeLock);
 
     changeInfo(metacls, RW_INITIALIZED, RW_INITIALIZING);
-    
-    cls->protect();
 }
 
 
@@ -5357,8 +5365,6 @@ _class_setFinalizeOnMainThread(Class cls)
 {
     assert(isRealized(newcls(cls)));
     changeInfo(newcls(cls), RW_FINALIZE_ON_MAIN_THREAD, 0);
-    
-    newcls(cls)->protect();
 }
 
 
@@ -5440,6 +5446,7 @@ void class_t::setHasCustomRR(bool inherited)
         c->data()->flags |= RW_HAS_CUSTOM_RR;
 #endif
     });
+    protect(); // [coop-defense]
 }
 
 
@@ -5465,6 +5472,7 @@ void class_t::setHasCustomAWZ(bool inherited )
         c->data()->flags |= RW_HAS_CUSTOM_AWZ;
 #endif
     });
+    protect(); // [coop-defense]
 }
 
 
@@ -5598,9 +5606,8 @@ class_setIvarLayout(Class cls_gen, const uint8_t *layout)
 
     try_free(ro_w->ivarLayout);
     ro_w->ivarLayout = _ustrdup_internal(layout);
-    
-    cls->protect();
 
+    cls->protect(); // [coop-defense]
     rwlock_unlock_write(&runtimeLock);
 }
 
@@ -5620,8 +5627,6 @@ _class_setIvarLayoutAccessor(Class cls_gen, const uint8_t* (*accessor) (id objec
     ro_w->ivarLayout = (uint8_t *)accessor;
     changeInfo(cls, RW_HAS_INSTANCE_SPECIFIC_LAYOUT, 0);
 
-    cls->protect();
-    
     rwlock_unlock_write(&runtimeLock);
 }
 
@@ -5671,8 +5676,7 @@ class_setWeakIvarLayout(Class cls_gen, const uint8_t *layout)
     try_free(ro_w->weakIvarLayout);
     ro_w->weakIvarLayout = _ustrdup_internal(layout);
 
-    cls->protect();
-    
+    cls->protect(); // [coop-defense]
     rwlock_unlock_write(&runtimeLock);
 }
 
@@ -5783,8 +5787,8 @@ addMethod(class_t *cls, SEL name, IMP imp, const char *types, BOOL replace)
 
         result = NULL;
     }
-    
-    cls->protect();
+
+    cls->protect(); // [coop-defense]
 
     return result;
 }
@@ -5826,8 +5830,6 @@ class_addIvar(Class cls_gen, const char *name, size_t size,
     class_t *cls = newcls(cls_gen);
 
     if (!cls) return NO;
-    
-    cls->protect();
 
     if (!type) type = "";
     if (name  &&  0 == strcmp(name, "")) name = NULL;
@@ -5890,8 +5892,7 @@ class_addIvar(Class cls_gen, const char *name, size_t size,
 
     // Ivar layout updated in registerClass.
 
-    cls->protect();
-    
+    cls->protect(); // [coop-defense]
     rwlock_unlock_write(&runtimeLock);
 
     return YES;
@@ -5936,8 +5937,7 @@ BOOL class_addProtocol(Class cls_gen, Protocol *protocol_gen)
 
     // fixme metaclass?
     
-    cls->protect();
-
+    cls->protect(); // [coop-defense]
     rwlock_unlock_write(&runtimeLock);
 
     return YES;
@@ -5970,7 +5970,7 @@ _class_addProperty(Class cls_gen, const char *name,
         rwlock_write(&runtimeLock);
         try_free(prop->attributes);
         prop->attributes = copyPropertyAttributeString(attrs, count);
-        cls->protect();
+        cls->protect(); // [coop-defense]
         rwlock_unlock_write(&runtimeLock);
         return YES;
     }
@@ -5987,8 +5987,8 @@ _class_addProperty(Class cls_gen, const char *name,
         
         plist->next = cls->data()->properties;
         cls->data()->properties = plist;
-        
-        cls->protect();
+
+        cls->protect(); // [coop-defense]
         rwlock_unlock_write(&runtimeLock);
         
         return YES;
@@ -6112,7 +6112,7 @@ objc_duplicateClass(Class original_gen, const char *name,
                      duplicate, duplicate->data()->ro);
     }
 
-    duplicate->protect();
+    duplicate->protect(); // [coop-defense]
     rwlock_unlock_write(&runtimeLock);
 
     return (Class)duplicate;
@@ -6133,11 +6133,6 @@ static void objc_initializeClassPair_internal(Class superclass_gen, const char *
     class_t *superclass = newcls(superclass_gen);
     class_t *cls = newcls(cls_gen);
     class_t *meta = newcls(meta_gen);
-    
-    superclass->protect();
-    cls->protect();
-    meta->protect();
-    
 
     class_ro_t *cls_ro_w, *meta_ro_w;
     
@@ -6197,10 +6192,10 @@ static void objc_initializeClassPair_internal(Class superclass_gen, const char *
         meta->superclass = cls;
         addSubclass(cls, meta);
     }
-    
-    superclass->protect();
-    cls->protect();
-    meta->protect();
+
+    superclass->protect(); // [coop-defense]
+    meta->protect(); // [coop-defense]
+    cls->protect(); // [coop-defense]
 }
 
 /***********************************************************************
@@ -6382,8 +6377,9 @@ void objc_registerClassPair(Class cls_gen)
     addRealizedClass(cls);
     addRealizedMetaclass(cls->isa);
     addNonMetaClass(cls);
-    
-    cls->protect();
+
+    cls->protect(); // [coop-defense]
+    cls->isa->protect(); // [coop-defense]
 
     rwlock_unlock_write(&runtimeLock);
 }
@@ -6957,6 +6953,9 @@ static class_t *setSuperclass(class_t *cls, class_t *newSuper)
     flushVtables(cls->isa);
     flushCaches(cls);
     flushVtables(cls);
+
+    cls->protect(); // [coop-defense]
+    cls->isa->protect(); // [coop-defense]
     
     return oldSuper;
 }
