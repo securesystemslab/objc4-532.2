@@ -41,7 +41,7 @@
 #define newprotocol(p) ((protocol_t *)p)
 #define newproperty(p) ((property_t *)p)
 
-static const char *getName(class_t *cls);
+//static const char *getName(class_t *cls);
 static uint32_t unalignedInstanceSize(class_t *cls);
 static uint32_t alignedInstanceSize(class_t *cls);
 static BOOL isMetaClass(class_t *cls);
@@ -4937,7 +4937,8 @@ const char *_class_getName(Class cls)
 * fixme
 * Locking: runtimeLock must be held by the caller
 **********************************************************************/
-static const char *
+//static const char * // Changed by yln
+const char *
 getName(class_t *cls)
 {
     // fixme hack rwlock_assert_writing(&runtimeLock);

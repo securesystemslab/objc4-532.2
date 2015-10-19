@@ -328,8 +328,8 @@ typedef struct class_rw_t {
     }
 } class_rw_t;
 
-// TODO(yln): remove me after debugging
-static void printBits(int s,void* p){int i,j;for(i=s-1;i>=0;i--)for(j=7;j>=0;j--)printf("%u",(*((unsigned char*)p+i)&(1<<j))>>j);puts("");}
+// Defined in [objc-runtime-new.mm]
+extern const char* getName(class_t* cls);
 
 typedef struct class_t {
     struct class_t *isa;
@@ -342,13 +342,12 @@ typedef struct class_t {
     uintptr_t data_NEVER_USE;  // class_rw_t * plus custom rr/alloc flags
     
     uint64_t computeHash() const {
-        assert(data() != nullptr);
-
         uint64_t h[5];
         h[0] = (uint64_t) this;
         h[1] = (uint64_t) isa;
         h[2] = (uint64_t) superclass;
         
+        assert(data() != nullptr);
         uint32_t flags = data()->flags; // works for class_rw_t and class_ro_t
         h[3] = (uint64_t) flags;
         
@@ -370,10 +369,7 @@ typedef struct class_t {
         if (hash != computeHash()) {
             fprintf(stderr,
                     "Found corrupted class '%s' at %p, hash: %llu\n",
-                    data()->ro->name, this, hash);
-            printf("class flags: ");
-            printBits(sizeof(data()->flags), &data()->flags);
-            printf("\n");
+                    getName((class_t*)this), this, hash);
             abort();
         }
     }
