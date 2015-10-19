@@ -17,14 +17,10 @@
 		513A033D19B4715200448729 /* libobjc.A.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC0630554660B00DB518D /* libobjc.A.dylib */; };
 		530032951BCC51E000CD12D1 /* (null) in Headers */ = {isa = PBXBuildFile; settings = {ASSET_TAGS = (); }; };
 		530032981BCC5A1100CD12D1 /* (null) in Sources */ = {isa = PBXBuildFile; settings = {ASSET_TAGS = (); }; };
-		533949101BCDA4D600A343EA /* objc-defense.h in Headers */ = {isa = PBXBuildFile; fileRef = 5339490F1BCDA4D600A343EA /* objc-defense.h */; settings = {ASSET_TAGS = (); }; };
-		533949111BCDA4DF00A343EA /* objc-defense.h in Headers */ = {isa = PBXBuildFile; fileRef = 5339490F1BCDA4D600A343EA /* objc-defense.h */; settings = {ASSET_TAGS = (); }; };
 		538379421BCD9B8400709511 /* objc-hmac.h in Headers */ = {isa = PBXBuildFile; fileRef = 538379411BCD9B8400709511 /* objc-hmac.h */; settings = {ASSET_TAGS = (); }; };
 		538379431BCD9B8400709511 /* objc-hmac.h in Headers */ = {isa = PBXBuildFile; fileRef = 538379411BCD9B8400709511 /* objc-hmac.h */; settings = {ASSET_TAGS = (); }; };
 		538379451BCD9BAA00709511 /* objc-hmac.mm in Sources */ = {isa = PBXBuildFile; fileRef = 538379441BCD9BAA00709511 /* objc-hmac.mm */; settings = {ASSET_TAGS = (); }; };
 		538379461BCD9BAA00709511 /* objc-hmac.mm in Sources */ = {isa = PBXBuildFile; fileRef = 538379441BCD9BAA00709511 /* objc-hmac.mm */; settings = {ASSET_TAGS = (); }; };
-		5383794F1BCD9EED00709511 /* objc-defense.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5383794D1BCD9EED00709511 /* objc-defense.mm */; settings = {ASSET_TAGS = (); }; };
-		538379501BCD9EED00709511 /* objc-defense.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5383794D1BCD9EED00709511 /* objc-defense.mm */; settings = {ASSET_TAGS = (); }; };
 		830F2A740D737FB800392440 /* objc-msg-arm.s in Sources */ = {isa = PBXBuildFile; fileRef = 830F2A690D737FB800392440 /* objc-msg-arm.s */; };
 		830F2A750D737FB900392440 /* objc-msg-i386.s in Sources */ = {isa = PBXBuildFile; fileRef = 830F2A6A0D737FB800392440 /* objc-msg-i386.s */; };
 		830F2A7D0D737FBB00392440 /* objc-msg-x86_64.s in Sources */ = {isa = PBXBuildFile; fileRef = 830F2A720D737FB800392440 /* objc-msg-x86_64.s */; };
@@ -256,10 +252,8 @@
 		513A037619B4B13100448729 /* cpu_capabilities.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = cpu_capabilities.h; sourceTree = "<group>"; };
 		513A037719B4B13100448729 /* pthread_machdep.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = pthread_machdep.h; sourceTree = "<group>"; };
 		513A037819B4B13100448729 /* vproc_priv.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = vproc_priv.h; sourceTree = "<group>"; };
-		5339490F1BCDA4D600A343EA /* objc-defense.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "objc-defense.h"; path = "runtime/objc-defense.h"; sourceTree = "<group>"; };
 		538379411BCD9B8400709511 /* objc-hmac.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "objc-hmac.h"; path = "runtime/objc-hmac.h"; sourceTree = "<group>"; };
 		538379441BCD9BAA00709511 /* objc-hmac.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = "objc-hmac.mm"; path = "runtime/objc-hmac.mm"; sourceTree = "<group>"; };
-		5383794D1BCD9EED00709511 /* objc-defense.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = "objc-defense.mm"; path = "runtime/objc-defense.mm"; sourceTree = "<group>"; };
 		830F2A690D737FB800392440 /* objc-msg-arm.s */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.asm; name = "objc-msg-arm.s"; path = "runtime/Messengers.subproj/objc-msg-arm.s"; sourceTree = "<group>"; };
 		830F2A6A0D737FB800392440 /* objc-msg-i386.s */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.asm; name = "objc-msg-i386.s"; path = "runtime/Messengers.subproj/objc-msg-i386.s"; sourceTree = "<group>"; };
 		830F2A720D737FB800392440 /* objc-msg-x86_64.s */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.asm; name = "objc-msg-x86_64.s"; path = "runtime/Messengers.subproj/objc-msg-x86_64.s"; sourceTree = "<group>"; tabWidth = 8; usesTabs = 1; };
@@ -412,7 +406,6 @@
 				838485CB0D6D68A200CEA253 /* objc-cache.mm */,
 				838485CC0D6D68A200CEA253 /* objc-class-old.m */,
 				838485CE0D6D68A200CEA253 /* objc-class.mm */,
-				5383794D1BCD9EED00709511 /* objc-defense.mm */,
 				838485D00D6D68A200CEA253 /* objc-errors.mm */,
 				838485D20D6D68A200CEA253 /* objc-exception.mm */,
 				399BC72D1224831B007FBDF0 /* objc-externalref.mm */,
@@ -651,7 +644,6 @@
 			children = (
 				830F2A920D73876100392440 /* objc-accessors.h */,
 				838485CF0D6D68A200CEA253 /* objc-config.h */,
-				5339490F1BCDA4D600A343EA /* objc-defense.h */,
 				83BE02E50FCCB24D00661494 /* objc-file-old.h */,
 				83BE02E60FCCB24D00661494 /* objc-file.h */,
 				538379411BCD9B8400709511 /* objc-hmac.h */,
@@ -680,7 +672,6 @@
 				83E50CF10FF19E8200D74C19 /* List.h in Headers */,
 				83E50CDC0FF19E8200D74C19 /* maptable.h in Headers */,
 				83E50CF20FF19E8200D74C19 /* message.h in Headers */,
-				533949111BCDA4DF00A343EA /* objc-defense.h in Headers */,
 				83E57595121E892100295464 /* objc-abi.h in Headers */,
 				83E50CF30FF19E8200D74C19 /* objc-accessors.h in Headers */,
 				83E50CDD0FF19E8200D74C19 /* objc-api.h in Headers */,
@@ -739,7 +730,6 @@
 				83112ED40F00599600A5FBAF /* objc-internal.h in Headers */,
 				838485FE0D6D68A200CEA253 /* objc-load.h in Headers */,
 				838486000D6D68A200CEA253 /* objc-loadmethod.h in Headers */,
-				533949101BCDA4D600A343EA /* objc-defense.h in Headers */,
 				831C85D50E10CF850066E64C /* objc-os.h in Headers */,
 				838486030D6D68A200CEA253 /* objc-private.h in Headers */,
 				393CEAC60DC69E67000B69DE /* objc-references.h in Headers */,
@@ -937,7 +927,6 @@
 				8383A3AF122600FB009290B8 /* maptable.mm in Sources */,
 				538379461BCD9BAA00709511 /* objc-hmac.mm in Sources */,
 				8383A3B0122600FB009290B8 /* objc-accessors.mm in Sources */,
-				538379501BCD9EED00709511 /* objc-defense.mm in Sources */,
 				8383A3B1122600FB009290B8 /* objc-auto.m in Sources */,
 				8383A3B2122600FB009290B8 /* objc-auto-dump.m in Sources */,
 				8383A3B3122600FB009290B8 /* objc-block-trampolines.mm in Sources */,
@@ -989,7 +978,6 @@
 				838485F20D6D68A200CEA253 /* objc-cache.mm in Sources */,
 				838485F30D6D68A200CEA253 /* objc-class-old.m in Sources */,
 				838485F50D6D68A200CEA253 /* objc-class.mm in Sources */,
-				5383794F1BCD9EED00709511 /* objc-defense.mm in Sources */,
 				838485F70D6D68A200CEA253 /* objc-errors.mm in Sources */,
 				838485F90D6D68A200CEA253 /* objc-exception.mm in Sources */,
 				838485FA0D6D68A200CEA253 /* objc-file.mm in Sources */,
