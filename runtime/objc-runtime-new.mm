@@ -3030,7 +3030,6 @@ void _read_images(header_info **hList, uint32_t hCount)
                 }
                 addRemappedClass(cls, NULL);
                 cls->superclass = NULL;
-                cls->protect(); // [coop-defense]
                 continue;
             }
 
@@ -3087,7 +3086,6 @@ void _read_images(header_info **hList, uint32_t hCount)
                     if (isMethodListFixedUp(mlist)) preoptimizedMethodLists++;
                 }
             }
-            cls->protect(); // [coop-defense]
         }
     }
 
@@ -3247,7 +3245,6 @@ void _read_images(header_info **hList, uint32_t hCount)
                                  getName(cls), cat->name);
                 }
             }
-            cls->protect(); // [coop-defense]
         }
     }
 
@@ -3260,8 +3257,18 @@ void _read_images(header_info **hList, uint32_t hCount)
     if (DebugNonFragileIvars) {
         realizeAllClasses();
     }
-    realizeAllClasses(); // TODO(yln): remove to make lazy again
-
+    
+    // [coop-defense]: Protect all loaded classes (incl. isa and superclass)
+    for (EACH_HEADER) {
+        classref_t* classlist = _getObjc2ClassList(hi, &count);
+        for (i = 0; i < count; i++) {
+            class_t* cls = ((class_t*) classlist[i]);
+            // TODO(yln): FIXME: this should really be done recursively for isa and superclass.
+            cls->protect();
+            cls->isa->protect();
+            cls->superclass->protect();
+        }
+    }
 #undef EACH_HEADER
 }
 
