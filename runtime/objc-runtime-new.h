@@ -132,10 +132,10 @@ typedef struct method_list_t {
         return *(method_t *)((uint8_t *)&first + i*getEntsize()); 
     }
 
-    uint64_t computeHash(const class_t* cls) const {
+    uint64_t computeHash() const {
         assert(2*4 + sizeof(method_t) == sizeof(method_list_t));
         size_t size = 2 * 4 + count * sizeof(method_t);
-        return computeHMAC(this, size, cls);
+        return computeHMAC(this, size);
     }
 
     // iterate methods, taking entsize into account
@@ -290,8 +290,8 @@ typedef struct class_ro_t {
     const uint8_t * weakIvarLayout;
     const property_list_t *baseProperties;
 
-    uint64_t computeHash(const class_t* cls) const {
-        return (baseMethods != nullptr) ? baseMethods->computeHash(cls) : 0;
+    uint64_t computeHash() const {
+        return (baseMethods != nullptr) ? baseMethods->computeHash() : 0;
     }
 
 } class_ro_t;
@@ -312,17 +312,17 @@ typedef struct class_rw_t {
     struct class_t *firstSubclass;
     struct class_t *nextSiblingClass;
 
-    uint64_t computeHash(const class_t* cls) const {
+    uint64_t computeHash() const {
         if (method_list == nullptr)
             return 0;
 
         if (!(flags & RW_METHOD_ARRAY))
-            return method_list->computeHash(cls);
+            return method_list->computeHash();
 
         uint64_t h = 0;
         for (int i = 0; method_lists[i] != nullptr; i++) {
-            uint64_t tmp = method_lists[i]->computeHash(cls);
-            h = combineHMAC(h, tmp, cls);
+            uint64_t tmp = method_lists[i]->computeHash();
+            h = combineHMAC(h, tmp);
         }
         return h;
     }
@@ -352,12 +352,12 @@ typedef struct class_t {
         h[3] = flags;
         
         if (flags & RW_REALIZED || flags & RW_FUTURE) { // class_rw_t
-            h[4] = data()->computeHash(this);
+            h[4] = data()->computeHash();
         } else { // class_ro_t
-            h[4] = ((class_ro_t*) data())->computeHash(this);
+            h[4] = ((class_ro_t*) data())->computeHash();
         }
 
-        return combineHMAC(h, 5, this);
+        return combineHMAC(h, 5);
     }
     void protect() {
         assert(this != nullptr);

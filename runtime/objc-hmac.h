@@ -13,8 +13,8 @@
 #include <stdint.h>
 
 // cls points to struct class_t
-extern uint64_t computeHMAC(const void* ptr, size_t size, const void* cls);
-extern uint64_t combineHMAC(uint64_t h1, uint64_t h2, const void* cls);
-extern uint64_t combineHMAC(uint64_t* elements, size_t count, const void* cls);
+extern uint64_t computeHMAC(const void* ptr, size_t size);
+extern uint64_t combineHMAC(uint64_t h1, uint64_t h2);
+extern uint64_t combineHMAC(uint64_t* elements, size_t count);
 
 #endif /* objc_hmac_h */
