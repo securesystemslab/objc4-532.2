@@ -1069,6 +1069,7 @@
 				"OTHER_LDFLAGS[sdk=macosx*]" = (
 					"-lauto",
 					"-lc++abi",
+					"-lsasl2",
 				);
 				PRIVATE_HEADERS_FOLDER_PATH = /usr/local/include/objc;
 				PRODUCT_NAME = objc.A;
@@ -1110,6 +1111,7 @@
 				"OTHER_LDFLAGS[sdk=macosx*]" = (
 					"-lauto",
 					"-lc++abi",
+					"-lsasl2",
 				);
 				PRIVATE_HEADERS_FOLDER_PATH = /usr/local/include/objc;
 				PRODUCT_NAME = objc.A;
@@ -1320,7 +1322,7 @@
 					"-fobjc-abi-version=2",
 					"-fdollars-in-identifiers",
 				);
-				OTHER_LDFLAGS = "-lc++abi";
+				OTHER_LDFLAGS = "-lc++abi -lsasl2";
 				PRIVATE_HEADERS_FOLDER_PATH = "$(INDIGO_INSTALL_PATH_PREFIX)/usr/local/include/objc";
 				PRODUCT_NAME = objc.A;
 				PUBLIC_HEADERS_FOLDER_PATH = "$(INDIGO_INSTALL_PATH_PREFIX)/usr/include/objc";
@@ -1351,7 +1353,7 @@
 					"-fobjc-abi-version=2",
 					"-fdollars-in-identifiers",
 				);
-				OTHER_LDFLAGS = "-lc++abi";
+				OTHER_LDFLAGS = "-lc++abi -lsasl2";
 				PRIVATE_HEADERS_FOLDER_PATH = "$(INDIGO_INSTALL_PATH_PREFIX)/usr/local/include/objc";
 				PRODUCT_NAME = objc.A;
 				PUBLIC_HEADERS_FOLDER_PATH = "$(INDIGO_INSTALL_PATH_PREFIX)/usr/include/objc";
