@@ -11,10 +11,12 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include <sasl/md5global.h>
+#include <sasl/md5.h>
+#include <sasl/hmac-md5.h>
 
-// cls points to struct class_t
-extern uint64_t computeHMAC(const void* ptr, size_t size);
-extern uint64_t combineHMAC(uint64_t h1, uint64_t h2);
-extern uint64_t combineHMAC(uint64_t* elements, size_t count);
+extern void hmac_init(HMAC_MD5_CTX* ctx);
+extern void hmac_update(HMAC_MD5_CTX* ctx, const void* ptr, size_t size);
+extern uint64_t hmac_final(HMAC_MD5_CTX* ctx);
 
 #endif /* objc_hmac_h */

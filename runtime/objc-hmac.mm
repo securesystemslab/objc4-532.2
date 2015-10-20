@@ -8,22 +8,16 @@
 
 #include "objc-hmac.h"
 
-// cls points to struct class_t
-uint64_t computeHMAC(const void* ptr, size_t size) {
-    // TODO(yln)
+void hmac_init(HMAC_MD5_CTX* ctx) {
+    uint64_t secret = 7; // TODO(yln): safely get this
+//    _sasl_hmac_md5_init(ctx, (const unsigned char*)&secret, sizeof(uint64_t));
+    // TODO(yln): we could precalculate intermidate state from key for performance.
+}
+
+void hmac_update(HMAC_MD5_CTX* ctx, const void* ptr, size_t size) {
+    
+}
+
+uint64_t hmac_final(HMAC_MD5_CTX* ctx) {
     return 7;
-}
-
-uint64_t combineHMAC(uint64_t h1, uint64_t h2) {
-    // TODO(yln)
-    return h1 + h2;
-}
-
-uint64_t combineHMAC(uint64_t* elements, size_t count) {
-    // TODO(yln)
-    uint64_t x = 0;
-    for (size_t i = 0; i < count; ++i) {
-        x += elements[i];
-    }
-    return x;
 }

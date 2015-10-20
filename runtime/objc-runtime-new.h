@@ -132,12 +132,12 @@ typedef struct method_list_t {
         return *(method_t *)((uint8_t *)&first + i*getEntsize()); 
     }
 
-    uint64_t computeHash() const {
+    void addHash(HMAC_MD5_CTX* ctx) const {
         assert(2*4 + sizeof(method_t) == sizeof(method_list_t));
         size_t size = 2 * 4 + count * sizeof(method_t);
-        return computeHMAC(this, size);
+        hmac_update(ctx, this, size);
     }
-
+    
     // iterate methods, taking entsize into account
     // fixme need a proper const_iterator
     struct method_iterator {
@@ -290,8 +290,10 @@ typedef struct class_ro_t {
     const uint8_t * weakIvarLayout;
     const property_list_t *baseProperties;
 
-    uint64_t computeHash() const {
-        return (baseMethods != nullptr) ? baseMethods->computeHash() : 0;
+    void addHash(HMAC_MD5_CTX* ctx) const {
+        if (baseMethods != nullptr) {
+            baseMethods->addHash(ctx);
+        }
     }
 
 } class_ro_t;
@@ -312,19 +314,17 @@ typedef struct class_rw_t {
     struct class_t *firstSubclass;
     struct class_t *nextSiblingClass;
 
-    uint64_t computeHash() const {
+    void addHash(HMAC_MD5_CTX* ctx) const {
         if (method_list == nullptr)
-            return 0;
+            return;
 
-        if (!(flags & RW_METHOD_ARRAY))
-            return method_list->computeHash();
-
-        uint64_t h = 0;
-        for (int i = 0; method_lists[i] != nullptr; i++) {
-            uint64_t tmp = method_lists[i]->computeHash();
-            h = combineHMAC(h, tmp);
+        if (flags & RW_METHOD_ARRAY) {
+            for (int i = 0; method_lists[i] != nullptr; i++) {
+                method_lists[i]->addHash(ctx);
+            }
+        } else {
+            method_list->addHash(ctx);
         }
-        return h;
     }
 } class_rw_t;
 
@@ -342,22 +342,24 @@ typedef struct class_t {
     uintptr_t data_NEVER_USE;  // class_rw_t * plus custom rr/alloc flags
 
     uint64_t computeHash() const {
-        uint64_t h[5];
-        h[0] = (uint64_t) this;
-        h[1] = (uint64_t) isa;
-        h[2] = (uint64_t) superclass;
+        HMAC_MD5_CTX ctx;
+        hmac_init(&ctx);
+        
+        const class_t* thisPtr = this;
+        hmac_update(&ctx, &thisPtr, sizeof(class_t*)); // this
+        hmac_update(&ctx, this, 2 * sizeof(class_t*)); // isa, superclass
         
         assert(data() != nullptr);
         uint32_t flags = data()->flags; // works for class_rw_t and class_ro_t
-        h[3] = flags;
+        hmac_update(&ctx, &flags, sizeof(uint32_t));
         
         if (flags & RW_REALIZED || flags & RW_FUTURE) { // class_rw_t
-            h[4] = data()->computeHash();
+            data()->addHash(&ctx);
         } else { // class_ro_t
-            h[4] = ((class_ro_t*) data())->computeHash();
+            ((class_ro_t*) data())->addHash(&ctx);
         }
-
-        return combineHMAC(h, 5);
+        
+        return hmac_final(&ctx);
     }
     void protect() {
         assert(this != nullptr);
