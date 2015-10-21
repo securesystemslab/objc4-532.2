@@ -1,0 +1,287 @@
+note: -----
+note: testing root ''
+note: -----
+note: testing 1 configurations:
+note: configuration ARCH=x86_64 CC=clang GUARDMALLOC=0 LANGUAGE=objective-c MEM=mrc SDK=system STDLIB=libstdc++
+note: -----
+note: 
+note: ARCH=x86_64 CC=clang GUARDMALLOC=0 LANGUAGE=objective-c MEM=mrc SDK=system STDLIB=libstdc++
+note: 
+SKIP: ARRLayouts    (MEM=mrc, but test requires arc)
+SKIP: atomicProperty    (LANGUAGE=objective-c, but test requires objective-c++)
+SKIP: cdtors    (LANGUAGE=objective-c, but test requires objective-c++)
+[43;37mSKIP: debuggerMode    (disabled by TEST_DISABLED)[0m
+SKIP: evil-category-00    (SDK=macosx10.10.5, but test requires iphoneos)
+SKIP: evil-category-1    (SDK=macosx10.10.5, but test requires iphoneos)
+SKIP: evil-category-2    (SDK=macosx10.10.5, but test requires iphoneos)
+SKIP: evil-category-3    (SDK=macosx10.10.5, but test requires iphoneos)
+SKIP: evil-category-4    (SDK=macosx10.10.5, but test requires iphoneos)
+SKIP: evil-class-00    (SDK=macosx10.10.5, but test requires iphoneos)
+SKIP: evil-class-1    (SDK=macosx10.10.5, but test requires iphoneos)
+SKIP: evil-class-2    (SDK=macosx10.10.5, but test requires iphoneos)
+SKIP: evil-class-3    (SDK=macosx10.10.5, but test requires iphoneos)
+SKIP: evil-class-4    (SDK=macosx10.10.5, but test requires iphoneos)
+SKIP: evil-class-5    (SDK=macosx10.10.5, but test requires iphoneos)
+SKIP: gcenforcer-nogc-2    (MEM=mrc, but test requires gc)
+SKIP: gcenforcer-requiresgc-2    (MEM=mrc, but test requires gc)
+SKIP: layout    (MEM=mrc, but test requires gc)
+[41;37mFAIL: /// test 'gcenforcer' \\\[0m
+[41;37m [0mclang: error: garbage collection is no longer supported
+[41;37mFAIL: \\\ test 'gcenforcer' ///[0m
+[41;37mFAIL: gcenforcer (build failed)[0m
+[41;37mFAIL: /// test 'gcenforcer-nogc-1' \\\[0m
+[41;37m [0mclang: error: garbage collection is no longer supported
+[41;37mFAIL: \\\ test 'gcenforcer-nogc-1' ///[0m
+[41;37mFAIL: gcenforcer-nogc-1 (build failed)[0m
+[41;37mFAIL: /// test 'gcenforcer-noobjc' \\\[0m
+[41;37m [0mclang: error: garbage collection is no longer supported
+[41;37mFAIL: \\\ test 'gcenforcer-noobjc' ///[0m
+[41;37mFAIL: gcenforcer-noobjc (build failed)[0m
+[41;37mFAIL: /// test 'gcenforcer-requiresgc-1' \\\[0m
+[41;37m [0mclang: error: garbage collection is no longer supported
+[41;37mFAIL: \\\ test 'gcenforcer-requiresgc-1' ///[0m
+[41;37mFAIL: gcenforcer-requiresgc-1 (build failed)[0m
+[41;37mFAIL: /// test 'gcenforcer-supportsgc' \\\[0m
+[41;37m [0mclang: error: garbage collection is no longer supported
+[41;37mFAIL: \\\ test 'gcenforcer-supportsgc' ///[0m
+[41;37mFAIL: gcenforcer-supportsgc (build failed)[0m
+[41;37mFAIL: /// test 'gdb-lock' \\\[0m
+[41;37m [0mUndefined symbols for architecture x86_64:
+[41;37m [0m  "_gdb_objc_isRuntimeLocked", referenced from:
+[41;37m [0m      _main in gdb-lock.o
+[41;37m [0mld: symbol(s) not found for architecture x86_64
+[41;37m [0mclang: error: linker command failed with exit code 1 (use -v to see invocation)
+[41;37mFAIL: \\\ test 'gdb-lock' ///[0m
+[41;37mFAIL: gdb-lock (build failed)[0m
+PASS: accessors
+PASS: accessors2
+PASS: addMethod
+PASS: addProtocol
+PASS: arr-cast
+[41;37mFAIL: /// test 'arr-weak' \\\[0m
+[41;37m [0mobjc[25789]: Cannot form weak reference to instance (0x7fa05bc04250) of class Crash. It is possible that this object was over-released, or is in the process of deallocation.
+[41;37m [0mCRASHED: SIGILL
+[41;37mFAIL: \\\ test 'arr-weak' ///[0m
+[41;37mFAIL: arr-weak: (run output does not match TEST_RUN_OUTPUT)[0m
+PASS: association
+PASS: association-cf
+PASS: badAltHandler
+PASS: blocksAsImps
+PASS: cacheflush
+PASS: category
+PASS: classgetclass
+PASS: classname
+PASS: classpair
+PASS: classversion
+PASS: concurrentcat
+PASS: copyIvarList
+PASS: copyMethodList
+PASS: copyPropertyList
+PASS: createInstance
+PASS: customrr
+PASS: customrr2
+PASS: definitions
+PASS: duplicateClass
+PASS: evil-category-0
+PASS: evil-category-000
+PASS: evil-class-0
+PASS: evil-class-000
+PASS: exc
+PASS: exchangeImp
+PASS: foreach
+[41;37mFAIL: /// test 'forward' \\\[0m
+[41;37m [0mobjc[25870]: +[Super idret::::::::::::::::::::::::::::]: unrecognized selector sent to instance 0x10be27228 (no message forward handler is installed)
+[41;37m [0msh: line 1: 25870 Illegal instruction: 4  env LANG=C ./forward.out 2>&1
+[41;37mFAIL: \\\ test 'forward' ///[0m
+[41;37mFAIL: forward: (output not 'OK: forward')[0m
+PASS: future
+PASS: gdb
+PASS: getMethod
+PASS: ignoredSelector
+PASS: imageorder
+PASS: initialize
+PASS: instanceSize
+PASS: ismeta
+PASS: ivar
+PASS: ivarSlide
+PASS: literals
+PASS: load
+PASS: load-order
+PASS: load-parallel
+PASS: load-reentrant
+PASS: methodArgs
+PASS: methodListSize
+PASS: method_getName
+[41;37mFAIL: /// test 'msgSend' \\\[0m
+[41;37m [0mOFFSET 56 NOT CAUGHT
+[41;37m [0mOFFSET 60 NOT CAUGHT
+[41;37m [0mOFFSET 63 NOT CAUGHT
+[41;37m [0mOFFSET 65 NOT CAUGHT
+[41;37m [0mOFFSET 71 NOT CAUGHT
+[41;37m [0mOFFSET 75 NOT CAUGHT
+[41;37m [0mOFFSET 77 NOT CAUGHT
+[41;37m [0mOFFSET 81 NOT CAUGHT
+[41;37m [0mOFFSET 83 NOT CAUGHT
+[41;37m [0mOFFSET 87 NOT CAUGHT
+[41;37m [0mOFFSET 90 NOT CAUGHT
+[41;37m [0mOFFSET 92 NOT CAUGHT
+[41;37m [0mOFFSET 96 NOT CAUGHT
+[41;37m [0mOFFSET 59 NOT CAUGHT
+[41;37m [0mOFFSET 63 NOT CAUGHT
+[41;37m [0mOFFSET 66 NOT CAUGHT
+[41;37m [0mOFFSET 68 NOT CAUGHT
+[41;37m [0mOFFSET 71 NOT CAUGHT
+[41;37m [0mOFFSET 77 NOT CAUGHT
+[41;37m [0mOFFSET 81 NOT CAUGHT
+[41;37m [0mOFFSET 83 NOT CAUGHT
+[41;37m [0mOFFSET 87 NOT CAUGHT
+[41;37m [0mOFFSET 89 NOT CAUGHT
+[41;37m [0mOFFSET 93 NOT CAUGHT
+[41;37m [0mOFFSET 96 NOT CAUGHT
+[41;37m [0mOFFSET 98 NOT CAUGHT
+[41;37m [0mOFFSET 101 NOT CAUGHT
+[41;37m [0mOFFSET 105 NOT CAUGHT
+[41;37m [0mOFFSET 56 NOT CAUGHT
+[41;37m [0mOFFSET 60 NOT CAUGHT
+[41;37m [0mOFFSET 63 NOT CAUGHT
+[41;37m [0mOFFSET 65 NOT CAUGHT
+[41;37m [0mOFFSET 71 NOT CAUGHT
+[41;37m [0mOFFSET 75 NOT CAUGHT
+[41;37m [0mOFFSET 77 NOT CAUGHT
+[41;37m [0mOFFSET 81 NOT CAUGHT
+[41;37m [0mOFFSET 83 NOT CAUGHT
+[41;37m [0mOFFSET 87 NOT CAUGHT
+[41;37m [0mOFFSET 90 NOT CAUGHT
+[41;37m [0mOFFSET 92 NOT CAUGHT
+[41;37m [0mOFFSET 96 NOT CAUGHT
+[41;37m [0mOFFSET 40 NOT CAUGHT
+[41;37m [0mOFFSET 44 NOT CAUGHT
+[41;37m [0mOFFSET 47 NOT CAUGHT
+[41;37m [0mOFFSET 49 NOT CAUGHT
+[41;37m [0mOFFSET 52 NOT CAUGHT
+[41;37m [0mOFFSET 55 NOT CAUGHT
+[41;37m [0mOFFSET 61 NOT CAUGHT
+[41;37m [0mOFFSET 65 NOT CAUGHT
+[41;37m [0mOFFSET 67 NOT CAUGHT
+[41;37m [0mOFFSET 71 NOT CAUGHT
+[41;37m [0mOFFSET 73 NOT CAUGHT
+[41;37m [0mOFFSET 77 NOT CAUGHT
+[41;37m [0mOFFSET 80 NOT CAUGHT
+[41;37m [0mOFFSET 82 NOT CAUGHT
+[41;37m [0mOFFSET 85 NOT CAUGHT
+[41;37m [0mOFFSET 88 NOT CAUGHT
+[41;37m [0mOFFSET 92 NOT CAUGHT
+[41;37m [0mOFFSET 44 NOT CAUGHT
+[41;37m [0mOFFSET 48 NOT CAUGHT
+[41;37m [0mOFFSET 51 NOT CAUGHT
+[41;37m [0mOFFSET 53 NOT CAUGHT
+[41;37m [0mOFFSET 56 NOT CAUGHT
+[41;37m [0mOFFSET 59 NOT CAUGHT
+[41;37m [0mOFFSET 65 NOT CAUGHT
+[41;37m [0mOFFSET 69 NOT CAUGHT
+[41;37m [0mOFFSET 71 NOT CAUGHT
+[41;37m [0mOFFSET 75 NOT CAUGHT
+[41;37m [0mOFFSET 77 NOT CAUGHT
+[41;37m [0mOFFSET 81 NOT CAUGHT
+[41;37m [0mOFFSET 84 NOT CAUGHT
+[41;37m [0mOFFSET 86 NOT CAUGHT
+[41;37m [0mOFFSET 89 NOT CAUGHT
+[41;37m [0mOFFSET 92 NOT CAUGHT
+[41;37m [0mOFFSET 96 NOT CAUGHT
+[41;37m [0mOFFSET 40 NOT CAUGHT
+[41;37m [0mOFFSET 44 NOT CAUGHT
+[41;37m [0mOFFSET 47 NOT CAUGHT
+[41;37m [0mOFFSET 49 NOT CAUGHT
+[41;37m [0mOFFSET 52 NOT CAUGHT
+[41;37m [0mOFFSET 55 NOT CAUGHT
+[41;37m [0mOFFSET 61 NOT CAUGHT
+[41;37m [0mOFFSET 65 NOT CAUGHT
+[41;37m [0mOFFSET 67 NOT CAUGHT
+[41;37m [0mOFFSET 71 NOT CAUGHT
+[41;37m [0mOFFSET 73 NOT CAUGHT
+[41;37m [0mOFFSET 77 NOT CAUGHT
+[41;37m [0mOFFSET 80 NOT CAUGHT
+[41;37m [0mOFFSET 82 NOT CAUGHT
+[41;37m [0mOFFSET 85 NOT CAUGHT
+[41;37m [0mOFFSET 88 NOT CAUGHT
+[41;37m [0mOFFSET 92 NOT CAUGHT
+[41;37m [0mOFFSET 44 NOT CAUGHT
+[41;37m [0mOFFSET 48 NOT CAUGHT
+[41;37m [0mOFFSET 51 NOT CAUGHT
+[41;37m [0mOFFSET 53 NOT CAUGHT
+[41;37m [0mOFFSET 56 NOT CAUGHT
+[41;37m [0mOFFSET 59 NOT CAUGHT
+[41;37m [0mOFFSET 65 NOT CAUGHT
+[41;37m [0mOFFSET 69 NOT CAUGHT
+[41;37m [0mOFFSET 71 NOT CAUGHT
+[41;37m [0mOFFSET 75 NOT CAUGHT
+[41;37m [0mOFFSET 77 NOT CAUGHT
+[41;37m [0mOFFSET 81 NOT CAUGHT
+[41;37m [0mOFFSET 84 NOT CAUGHT
+[41;37m [0mOFFSET 86 NOT CAUGHT
+[41;37m [0mOFFSET 89 NOT CAUGHT
+[41;37m [0mOFFSET 92 NOT CAUGHT
+[41;37m [0mOFFSET 96 NOT CAUGHT
+[41;37m [0mOK: msgSend.m
+[41;37mFAIL: \\\ test 'msgSend' ///[0m
+[41;37mFAIL: msgSend: (output not 'OK: msgSend')[0m
+PASS: nilAPIArgs
+PASS: nsexc
+PASS: nsobject
+PASS: nsprotocol
+PASS: property
+PASS: propertyDesc
+PASS: protocol
+PASS: protocol_copyMethodList
+PASS: protocol_copyPropertyList
+PASS: protocol_cw
+[41;37mFAIL: /// test 'resolve' \\\[0m
+[41;37m [0mobjc[25973]: +[Sub missingClassMethod]: unrecognized selector sent to instance 0x10cc997d0 (no message forward handler is installed)
+[41;37m [0msh: line 1: 25973 Illegal instruction: 4  env LANG=C ./resolve.out 2>&1
+[41;37mFAIL: \\\ test 'resolve' ///[0m
+[41;37mFAIL: resolve: (run output does not match TEST_RUN_OUTPUT)[0m
+[43;37mPASS: /// test 'rr-autorelease' \\\[0m
+[43;37m [0mWARN: rdar://9167170 ignore NSPopAutoreleasePool(0)
+[43;37m [0mOK: rr-autorelease
+[43;37mPASS: \\\ test 'rr-autorelease' ///[0m
+PASS: rr-autorelease (with warnings)
+PASS: rr-autorelease-fast
+[43;37mPASS: /// test 'rr-nsautorelease' \\\[0m
+[43;37m [0mWARN: rdar://7138159 NSAutoreleasePool leaks
+[43;37m [0mWARN: rdar://7138159 NSAutoreleasePool leaks
+[43;37m [0mWARN: rdar://7138159 NSAutoreleasePool leaks
+[43;37m [0mOK: rr-nsautorelease
+[43;37mPASS: \\\ test 'rr-nsautorelease' ///[0m
+PASS: rr-nsautorelease (with warnings)
+PASS: runtime
+PASS: sel
+PASS: setSuper
+PASS: subscripting
+PASS: super
+PASS: synchronized
+[41;37mFAIL: /// test 'synchronized-counter' \\\[0m
+[41;37m [0mBAD: failed assertion 'pthread_getspecific(__PTK_FRAMEWORK_OBJC_KEY5)' at /Users/jlettner/work/objc4-532.2/test/synchronized-counter.m:70
+[41;37mFAIL: \\\ test 'synchronized-counter' ///[0m
+[41;37mFAIL: synchronized-counter: (failed)[0m
+PASS: synchronized-grid
+PASS: taggedNSPointers
+PASS: taggedPointers
+[41;37mFAIL: /// test 'unload' \\\[0m
+[41;37m [0mobjc[26015]: -[BigClass method_0]: unrecognized selector sent to instance 0x7ff6f14049c0 (no message forward handler is installed)
+[41;37m [0msh: line 1: 26015 Illegal instruction: 4  env LANG=C ./unload.out 2>&1
+[41;37mFAIL: \\\ test 'unload' ///[0m
+[41;37mFAIL: unload: (output not 'OK: unload')[0m
+PASS: unwind
+PASS: weakcopy
+PASS: weakframework-missing
+PASS: weakframework-not-missing
+PASS: weakimport-missing
+PASS: weakimport-not-missing
+PASS: xref
+PASS: zone
+note:
+[41;37mnote: ARCH=x86_64 CC=clang GUARDMALLOC=0 LANGUAGE=objective-c MEM=mrc SDK=system STDLIB=libstdc++[0m
+[41;37mnote: 91 tests, 12 failures[0m
+note: -----
+[41;37mnote: 1 configurations, 1 with failures[0m
+[41;37mnote: 91 tests, 12 failures[0m
