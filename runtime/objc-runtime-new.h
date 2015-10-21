@@ -133,8 +133,8 @@ typedef struct method_list_t {
     }
 
     void addHash(HMAC_MD5_CTX* ctx) const {
-        assert(2*4 + sizeof(method_t) == sizeof(method_list_t));
-        size_t size = 2 * 4 + count * sizeof(method_t);
+        assert(2 * sizeof(uint32_t) + sizeof(method_t) == sizeof(method_list_t));
+        size_t size = 2 * sizeof(uint32_t) + count * getEntsize();
         hmac_update(ctx, this, size);
     }
     
@@ -367,11 +367,12 @@ typedef struct class_t {
     }
     void verify_() const {
         assert(this != nullptr);
-        if (hash != computeHash()) {
+        uint64_t h = computeHash();
+        if (h != hash) {
             fprintf(stderr,
                     "Found corrupted class '%s' at %p\n"
-                    "saved hash: %24llu\ncomputed hash: %21llu\n",
-                    getName((class_t*)this), this, hash, computeHash());
+                    "stored hash: %23llu\ncomputed hash: %21llu\n",
+                    getName((class_t*) this), this, hash, h);
             abort();
         }
     }
