@@ -369,8 +369,9 @@ typedef struct class_t {
         assert(this != nullptr);
         if (hash != computeHash()) {
             fprintf(stderr,
-                    "Found corrupted class '%s' at %p, hash: %llu\n",
-                    getName((class_t*)this), this, hash);
+                    "Found corrupted class '%s' at %p\n"
+                    "saved hash: %24llu\ncomputed hash: %21llu\n",
+                    getName((class_t*)this), this, hash, computeHash());
             abort();
         }
     }

@@ -10,7 +10,7 @@
 
 void hmac_init(HMAC_MD5_CTX* ctx) {
     uint64_t secret = 7; // TODO(yln): safely get this
-    _sasl_hmac_md5_init(ctx, (const uint8_t*)&secret, sizeof(uint64_t));
+    _sasl_hmac_md5_init(ctx, (const uint8_t*) &secret, sizeof(uint64_t));
     // TODO(yln): we could precalculate intermidate state from key for performance.
 }
 
