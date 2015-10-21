@@ -10,7 +10,7 @@ chdir dirname $0;
 chomp (my $DIR = `pwd`);
 
 my $TESTLIBNAME = "libobjc.A.dylib";
-my $TESTLIBPATH = "/usr/lib/$TESTLIBNAME";
+my $TESTLIBPATH = "/Users/jlettner/work/objc4-532.2/build/Debug/$TESTLIBNAME";
 
 my $BUILDDIR = "/tmp/test-$TESTLIBNAME-build";
 
@@ -883,7 +883,9 @@ sub make_one_config {
 
     if ($C{CC} =~ /clang/) {
         $cflags .= " -Qunused-arguments -fno-caret-diagnostics";
-        $cflags .= " -stdlib=$C{STDLIB} -fno-objc-link-runtime";
+        $cflags .= " -stdlib=$C{STDLIB}"; #" -fno-objc-link-runtime";
+        $cflags .= " -I/Users/jlettner/work/objc4-532.2/include -I/Users/jlettner/work/objc4-532.2";
+        $cflags .= " -Wno-objc-root-class -Wno-objc-root-class -Wno-deprecated-objc-isa-usage -Wno-missing-selector-name -Wno-cast-of-sel-type";
     }
 
     
