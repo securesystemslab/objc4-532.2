@@ -947,8 +947,10 @@ IMP lookUpMethod(Class cls, SEL sel, BOOL initialize, BOOL cache, id inst)
         if (methodPC) return methodPC;    
     }
 
+    lockForMethodLookup();
     // [coop-defense]: check integrity before using/modifying any metadata
     ((class_t*) cls)->verify_();
+    unlockForMethodLookup();
 
     // realize, +initialize, and any special early exit
     methodPC = prepareForMethodLookup(cls, sel, initialize, inst);
