@@ -3495,6 +3495,12 @@ method_setImplementation(Method m, IMP imp)
     IMP result;
     rwlock_write(&runtimeLock);
     result = _method_setImplementation(Nil, newmethod(m), imp);
+
+    // [coop-defense]: call protect for all realized classes (expensive but safe)
+    FOREACH_REALIZED_CLASS_AND_SUBCLASS(c, nullptr, {
+        c->protect();
+    });
+
     rwlock_unlock_write(&runtimeLock);
     return result;
 }
@@ -3538,6 +3544,11 @@ void method_exchangeImplementations(Method m1_gen, Method m2_gen)
     updateCustomRR_AWZ(nil, m2);
 
     // fixme update monomorphism if necessary
+
+    // [coop-defense]: call protect for all realized classes (expensive but safe)
+    FOREACH_REALIZED_CLASS_AND_SUBCLASS(c, nullptr, {
+        c->protect();
+    });
 
     rwlock_unlock_write(&runtimeLock);
 }
