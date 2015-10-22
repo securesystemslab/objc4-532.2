@@ -17,6 +17,9 @@
 		513A033D19B4715200448729 /* libobjc.A.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC0630554660B00DB518D /* libobjc.A.dylib */; };
 		530032951BCC51E000CD12D1 /* (null) in Headers */ = {isa = PBXBuildFile; settings = {ASSET_TAGS = (); }; };
 		530032981BCC5A1100CD12D1 /* (null) in Sources */ = {isa = PBXBuildFile; settings = {ASSET_TAGS = (); }; };
+		5327450A1BD995CE00A2E6F0 /* objc-secrets.mm in Sources */ = {isa = PBXBuildFile; fileRef = 532745091BD995CE00A2E6F0 /* objc-secrets.mm */; settings = {ASSET_TAGS = (); }; };
+		5327450B1BD995CE00A2E6F0 /* objc-secrets.mm in Sources */ = {isa = PBXBuildFile; fileRef = 532745091BD995CE00A2E6F0 /* objc-secrets.mm */; settings = {ASSET_TAGS = (); }; };
+		5327450D1BD9960800A2E6F0 /* objc-secrets.h in Headers */ = {isa = PBXBuildFile; fileRef = 5327450C1BD9960800A2E6F0 /* objc-secrets.h */; settings = {ASSET_TAGS = (); }; };
 		538379421BCD9B8400709511 /* objc-hmac.h in Headers */ = {isa = PBXBuildFile; fileRef = 538379411BCD9B8400709511 /* objc-hmac.h */; settings = {ASSET_TAGS = (); }; };
 		538379431BCD9B8400709511 /* objc-hmac.h in Headers */ = {isa = PBXBuildFile; fileRef = 538379411BCD9B8400709511 /* objc-hmac.h */; settings = {ASSET_TAGS = (); }; };
 		538379451BCD9BAA00709511 /* objc-hmac.mm in Sources */ = {isa = PBXBuildFile; fileRef = 538379441BCD9BAA00709511 /* objc-hmac.mm */; settings = {ASSET_TAGS = (); }; };
@@ -252,6 +255,8 @@
 		513A037619B4B13100448729 /* cpu_capabilities.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = cpu_capabilities.h; sourceTree = "<group>"; };
 		513A037719B4B13100448729 /* pthread_machdep.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = pthread_machdep.h; sourceTree = "<group>"; };
 		513A037819B4B13100448729 /* vproc_priv.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = vproc_priv.h; sourceTree = "<group>"; };
+		532745091BD995CE00A2E6F0 /* objc-secrets.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = "objc-secrets.mm"; path = "runtime/objc-secrets.mm"; sourceTree = "<group>"; };
+		5327450C1BD9960800A2E6F0 /* objc-secrets.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "objc-secrets.h"; path = "runtime/objc-secrets.h"; sourceTree = "<group>"; };
 		538379411BCD9B8400709511 /* objc-hmac.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "objc-hmac.h"; path = "runtime/objc-hmac.h"; sourceTree = "<group>"; };
 		538379441BCD9BAA00709511 /* objc-hmac.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = "objc-hmac.mm"; path = "runtime/objc-hmac.mm"; sourceTree = "<group>"; };
 		830F2A690D737FB800392440 /* objc-msg-arm.s */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.asm; name = "objc-msg-arm.s"; path = "runtime/Messengers.subproj/objc-msg-arm.s"; sourceTree = "<group>"; };
@@ -428,6 +433,7 @@
 				838485E10D6D68A200CEA253 /* objc-runtime-new.mm */,
 				838485E20D6D68A200CEA253 /* objc-runtime-old.m */,
 				838485E40D6D68A200CEA253 /* objc-runtime.mm */,
+				532745091BD995CE00A2E6F0 /* objc-secrets.mm */,
 				838485E60D6D68A200CEA253 /* objc-sel-set.mm */,
 				83EB007A121C9EC200B92C16 /* objc-sel-table.s */,
 				838485E80D6D68A200CEA253 /* objc-sel.mm */,
@@ -656,6 +662,7 @@
 				83BE02E70FCCB24D00661494 /* objc-runtime-old.h */,
 				838485E50D6D68A200CEA253 /* objc-sel-set.h */,
 				39ABD71F12F0B61800D1054C /* objc-weak.h */,
+				5327450C1BD9960800A2E6F0 /* objc-secrets.h */,
 			);
 			name = "Project Headers";
 			sourceTree = "<group>";
@@ -742,6 +749,7 @@
 				838486140D6D68A200CEA253 /* Object.h in Headers */,
 				8384861E0D6D68A800CEA253 /* Protocol.h in Headers */,
 				838486200D6D68A800CEA253 /* runtime.h in Headers */,
+				5327450D1BD9960800A2E6F0 /* objc-secrets.h in Headers */,
 				39ABD72312F0B61800D1054C /* objc-weak.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -962,6 +970,7 @@
 				8383A3D3122600FB009290B8 /* objc-msg-x86_64.s in Sources */,
 				8383A3D4122600FB009290B8 /* objc-probes.d in Sources */,
 				8383A3DC1226291C009290B8 /* objc-externalref.mm in Sources */,
+				5327450B1BD995CE00A2E6F0 /* objc-secrets.mm in Sources */,
 				39ABD72612F0B61800D1054C /* objc-weak.mm in Sources */,
 				9672F7EF14D5F488007CEC96 /* NSObject.mm in Sources */,
 				83725F4C14CA5C210014370E /* objc-opt.mm in Sources */,
@@ -993,6 +1002,7 @@
 				8384860F0D6D68A200CEA253 /* objc-sel.mm in Sources */,
 				838486110D6D68A200CEA253 /* objc-sync.mm in Sources */,
 				838486120D6D68A200CEA253 /* objc-typeencoding.mm in Sources */,
+				5327450A1BD995CE00A2E6F0 /* objc-secrets.mm in Sources */,
 				838486150D6D68A200CEA253 /* Object.m in Sources */,
 				8384861F0D6D68A800CEA253 /* Protocol.mm in Sources */,
 				838486250D6D68F000CEA253 /* List.m in Sources */,
@@ -1322,7 +1332,10 @@
 					"-fobjc-abi-version=2",
 					"-fdollars-in-identifiers",
 				);
-				OTHER_LDFLAGS = "-lc++abi -lsasl2";
+				OTHER_LDFLAGS = (
+					"-lc++abi",
+					"-lsasl2",
+				);
 				PRIVATE_HEADERS_FOLDER_PATH = "$(INDIGO_INSTALL_PATH_PREFIX)/usr/local/include/objc";
 				PRODUCT_NAME = objc.A;
 				PUBLIC_HEADERS_FOLDER_PATH = "$(INDIGO_INSTALL_PATH_PREFIX)/usr/include/objc";
@@ -1353,7 +1366,10 @@
 					"-fobjc-abi-version=2",
 					"-fdollars-in-identifiers",
 				);
-				OTHER_LDFLAGS = "-lc++abi -lsasl2";
+				OTHER_LDFLAGS = (
+					"-lc++abi",
+					"-lsasl2",
+				);
 				PRIVATE_HEADERS_FOLDER_PATH = "$(INDIGO_INSTALL_PATH_PREFIX)/usr/local/include/objc";
 				PRODUCT_NAME = objc.A;
 				PUBLIC_HEADERS_FOLDER_PATH = "$(INDIGO_INSTALL_PATH_PREFIX)/usr/include/objc";
