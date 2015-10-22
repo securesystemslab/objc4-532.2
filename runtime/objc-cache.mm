@@ -96,8 +96,7 @@
 
 typedef struct {
     SEL name;     // same layout as struct old_method
-//    void *unused; // [coop-defense]: comment out unused field; use space for hash
-    uint64_t hash;
+    void *unused;
     IMP imp;  // same layout as struct old_method
 } cache_entry;
 
