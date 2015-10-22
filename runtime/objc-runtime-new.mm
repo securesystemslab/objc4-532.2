@@ -3387,6 +3387,9 @@ void _unload_image(header_info *hi)
 struct objc_method_description *
 method_getDescription(Method m)
 {
+#ifndef NDEBUG // [coop-defense]
+    fprintf(stderr, "WARNING: Exported function 'method_getDescription' without access to class pointer called.\n");
+#endif
     if (!m) return NULL;
     return (struct objc_method_description *)newmethod(m);
 }
@@ -3484,6 +3487,9 @@ _method_setImplementation(class_t *cls, method_t *m, IMP imp)
 IMP 
 method_setImplementation(Method m, IMP imp)
 {
+#ifndef NDEBUG // [coop-defense]
+    fprintf(stderr, "WARNING: Exported function 'method_setImplementation' without access to class pointer called.\n");
+#endif
     // Don't know the class - will be slow if vtables are affected
     // fixme build list of classes whose Methods are known externally?
     IMP result;
@@ -3496,6 +3502,9 @@ method_setImplementation(Method m, IMP imp)
 
 void method_exchangeImplementations(Method m1_gen, Method m2_gen)
 {
+#ifndef NDEBUG // [coop-defense]
+    fprintf(stderr, "WARNING: Exported function 'method_exchangeImplementations' without access to class pointer called.\n");
+#endif
     method_t *m1 = newmethod(m1_gen);
     method_t *m2 = newmethod(m2_gen);
     if (!m1  ||  !m2) return;
