@@ -335,7 +335,7 @@ typedef struct class_t {
     struct class_t *isa;
     struct class_t *superclass;
     Cache cache;
-    union {
+    union { // [coop-defense]: deactivate vtables and use field for hash
         IMP *vtable;
         uint64_t hash;
     };
