@@ -102,10 +102,27 @@ __BEGIN_DECLS
 // classref_t is unremapped class_t*
 typedef struct classref * classref_t;
 
+// [coop-defense]: make additional space in method_t struct to hold a hash
+typedef struct {
+    const char *types;
+    uint64_t hash;
+} method_hash_t;
+
 struct method_t {
     SEL name;
-    const char *types;
+//    const char *types; // [coop-defense]: replace with pointer to method_hash_t
+    union {
+        const char* oldTypes;
+        method_hash_t* ext;
+    };
     IMP imp;
+
+    void protect(class_t* cls) {
+        // TODO(yln)
+    }
+    void verify_(class_t* cls) {
+        // TODO(yln)
+    }
 
     struct SortBySELAddress :
         public std::binary_function<const method_t&,

@@ -3442,7 +3442,7 @@ const char *
 method_getTypeEncoding(Method m)
 {
     if (!m) return NULL;
-    return newmethod(m)->types;
+    return newmethod(m)->ext->types;
 }
 
 
@@ -3973,7 +3973,7 @@ protocol_copyMethodDescriptionList(Protocol *p,
         for (i = 0; i < count; i++) {
             method_t *m = method_list_nth(mlist, i);
             result[i].name = sel_registerName((const char *)m->name);
-            result[i].types = (char *)m->types;
+            result[i].types = (char *)m->ext->types;
         }
     }
 
@@ -4273,7 +4273,9 @@ _protocol_addMethod(method_list_t **list, SEL name, const char *types)
 
     method_t *meth = method_list_nth(*list, (*list)->count++);
     meth->name = name;
-    meth->types = _strdup_internal(types ? types : "");
+//    meth->types = _strdup_internal(types ? types : ""); // [coop-defense]
+    meth->ext = (method_hash_t*) _calloc_internal(sizeof(method_hash_t), 1);
+    meth->ext->types = _strdup_internal(types ? types : "");
     meth->imp = NULL;
 }
 
@@ -5793,12 +5795,15 @@ addMethod(class_t *cls, SEL name, IMP imp, const char *types, BOOL replace)
         newlist->entsize_NEVER_USE = (uint32_t)sizeof(method_t) | fixed_up_method_list;
         newlist->count = 1;
         newlist->first.name = name;
-        newlist->first.types = strdup(types);
+//        newlist->first.types = strdup(types); // [coop-defense]
+        newlist->first.ext = (method_hash_t*) _calloc_internal(sizeof(method_hash_t), 1);
+        newlist->first.ext->types = strdup(types);
         if (!ignoreSelector(name)) {
             newlist->first.imp = imp;
         } else {
             newlist->first.imp = (IMP)&_objc_ignored_method;
         }
+        newlist->first.protect(cls);
 
         BOOL vtablesAffected = NO;
         attachMethodLists(cls, &newlist, 1, NO, NO, &vtablesAffected);
@@ -6460,7 +6465,8 @@ static void free_class(class_t *cls)
     FOREACH_METHOD_LIST(mlist, cls, {
         for (i = 0; i < mlist->count; i++) {
             method_t *m = method_list_nth(mlist, i);
-            try_free(m->types);
+            try_free(m->ext->types);
+            try_free(m->ext);
         }
         try_free(mlist);
     });
