@@ -161,7 +161,10 @@ _objc_exitPoints:
 
 // Method descriptor
 #define method_name 	0
+#define method_hash_ptr 8
 #define method_imp 	16
+
+#define method_hash     0 // FIXME: match this with objc-runtime-new.h
 
 // Cache header
 #define mask		0
@@ -533,6 +536,10 @@ L_dw_leave_$0:
 .else
 	mov	%a3d, %eax		// index = sel
 .endif
+
+        // save class to %rdx for now
+        push %rdx
+        mov %r11, %rdx
 	
 // search the receiver's cache
 // r11 = method (soon)
@@ -553,6 +560,31 @@ L_dw_leave_$0:
 	jne	1b				//   goto loop
 
 	// cache hit, r11 = method triplet
+        // check against hash
+        xor %r10, %r10
+
+        call __get_secret_class_key
+        mul %rdx              // rdx:rax = K_class * class = rax * rdx
+        add %rdx, %r10
+
+        call __get_secret_sel_key
+        mul method_name(%r11) // rdx:rax = K_sel * sel = rax * r11[method_name]
+        add %rdx, %r10
+
+        call __get_secret_imp_key
+        mul method_imp(%r11)  // rdx:rax = K_imp * imp = rax * r11[method_imp]
+        add %rdx, %r10
+
+        pop %rdx
+        mov method_hash_ptr(%r11), %rax
+        cmp method_hash(%rax), %r10
+        je 1f
+
+        // cache hash check failed
+        // FIXME: do something better here
+        hlt
+
+1:
 	// restore saved registers
 	pop	%rax
 	DW_POP	$1
