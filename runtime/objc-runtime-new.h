@@ -99,12 +99,14 @@ __BEGIN_DECLS
 #   define RW_HAS_CUSTOM_AWZ     (1<<16)
 #endif
 
+#define METHOD_EXT_TAG  (1<<63)
+
 // classref_t is unremapped class_t*
 typedef struct classref * classref_t;
 
 // [coop-defense]: make additional space in method_t struct to hold a hash
 typedef struct {
-    const char *types;
+    const char* types;
     uint64_t hash;
 } method_hash_t;
 
@@ -114,8 +116,25 @@ struct method_t {
     union {
         const char* oldTypes;
         method_hash_t* ext;
+        uint64_t tag;
     };
     IMP imp;
+    
+    boolean_t isExtension() const {
+        return (tag & METHOD_EXT_TAG) != 0;
+    }
+    const char* getTypes() const {
+        return isExtension() ? ext->types : oldTypes;
+    }
+    method_hash_t* getExt() {
+        assert(isExtension());
+        return ext;
+    }
+    void transition(method_hash_t* newExt) {
+        assert(!isExtension());
+        newExt->types = oldTypes;
+        ext = newExt;
+    }
 
     void protect(class_t* cls) {
         // TODO(yln)
