@@ -506,6 +506,49 @@ L_dw_leave_$0:
 	// These instructions must match the DWARF data in EMIT_FDE.
 .endmacro
 
+// Cache hash-related macros and functions
+// $0 = register holding pointer to class structure
+// $1 = register holding pointer to cache_entry structure
+// $2 = register to store the computed hash into
+.macro ComputeCacheHash
+.if $0 != %rdx
+        movq $0, %rdx
+.endif
+
+        xorl %r10d, %r10d
+        call __objc_get_secret_cache_table_ptr
+
+        // (class_lo + K[0]) * (class_hi + K[1])
+        movq %rdx, %rcx
+        shr $$32, %rcx
+        addl  (%rax), %ecx
+        addl 4(%rax), %edx
+        imul $rcx, %rdx
+        addq %rdx, %r10
+
+        // (name_ptr_lo + K[2]) * (name_ptr_hi + K[3])
+        movq method_name($1), %rdx
+        movq %rdx, %rcx
+        shr $$32, %rcx
+        addl  8(%rax), %ecx
+        addl 12(%rax), %edx
+        imul $rcx, $rdx
+        addq %rdx, %r10
+
+        // (imp_ptr_lo + K[4]) * (imp_ptr_hi + K[5])
+        movq method_imp($1), %rdx
+        movq %rdx, %rcx
+        shr $$32, %rcx
+        addl 16(%rax), %ecx
+        addl 20(%rax), %edx
+        imul $rcx, $rdx
+        addq %rdx, %r10
+
+        // FIXME: tunable shift/table size
+        shr $$44, %r10
+        movq 24(%rax, %r10, 8), $2
+
+.endmacro
 
 /////////////////////////////////////////////////////////////////////
 //
@@ -562,38 +605,7 @@ L_dw_leave_$0:
 
 	// cache hit, r11 = method triplet
         // check against hash
-        xorl %r10d, %r10d
-        call __get_secret_cache_keys
-
-        // (class_lo + K[0]) * (class_hi + K[1])
-        movq %rdx, %rcx
-        shr $32, %rcx
-        addl  (%rax), %ecx
-        addl 4(%rax), %edx
-        imul $rcx, %rdx
-        addq %rdx, %r10
-
-        // (name_ptr_lo + K[2]) * (name_ptr_hi + K[3])
-        movq method_name(%r11), %rdx
-        movq %rdx, %rcx
-        shr $32, %rcx
-        addl  8(%rax), %ecx
-        addl 12(%rax), %edx
-        imul $rcx, $rdx
-        addq %rdx, %r10
-
-        // (imp_ptr_lo + K[4]) * (imp_ptr_hi + K[5])
-        movq method_imp(%r11), %rdx
-        movq %rdx, %rcx
-        shr $32, %rcx
-        addl 16(%rax), %ecx
-        addl 20(%rax), %edx
-        imul $rcx, $rdx
-        addq %rdx, %r10
-
-        // FIXME: tunable shift/table size
-        shr $44, %r10
-        movq 24(%rax, %r10, 8), %r10
+        ComputeCacheHash %rdx, %r11, %r10
 
         pop %rdx
         pop %rcx
@@ -1614,6 +1626,16 @@ LMsgForwardStretError:
 	ret
 	
 	END_ENTRY __objc_ignored_method
+
+
+        // uint64_t __objc_compute_cache_hash(Class cls, struct cache_entry *e)
+        // FIXME: make sure this isn't exported
+        STATIC_ENTRY __objc_compute_cache_hash
+
+        ComputeCacheHash %rdi, %rsi, %rax
+        ret
+
+        END_ENTRY __objc_compute_cache_hash
 	
 	
 /********************************************************************
