@@ -523,7 +523,7 @@ L_dw_leave_$0:
         shr $$32, %rcx
         addl  (%rax), %ecx
         addl 4(%rax), %edx
-        imul $rcx, %rdx
+        imul %rcx, %rdx
         addq %rdx, %r10
 
         // (name_ptr_lo + K[2]) * (name_ptr_hi + K[3])
@@ -532,7 +532,7 @@ L_dw_leave_$0:
         shr $$32, %rcx
         addl  8(%rax), %ecx
         addl 12(%rax), %edx
-        imul $rcx, $rdx
+        imul %rcx, %rdx
         addq %rdx, %r10
 
         // (imp_ptr_lo + K[4]) * (imp_ptr_hi + K[5])
@@ -541,7 +541,7 @@ L_dw_leave_$0:
         shr $$32, %rcx
         addl 16(%rax), %ecx
         addl 20(%rax), %edx
-        imul $rcx, $rdx
+        imul %rcx, %rdx
         addq %rdx, %r10
 
         // FIXME: tunable shift/table size
