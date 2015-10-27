@@ -124,23 +124,17 @@ struct method_t {
         return (tag & METHOD_EXT_TAG) != 0;
     }
     const char* getTypes() const {
-        return isExtension() ? ext->types : oldTypes;
+        return isExtension() ? getExt()->types : oldTypes;
     }
-    method_hash_t* getExt() {
+    method_hash_t* getExt() const {
         assert(isExtension());
-        return ext;
+        return (method_hash_t*) (tag & ~METHOD_EXT_TAG);
     }
     void transition(method_hash_t* newExt) {
         assert(!isExtension());
         newExt->types = oldTypes;
         ext = newExt;
-    }
-
-    void protect(class_t* cls) {
-        // TODO(yln)
-    }
-    void verify_(class_t* cls) {
-        // TODO(yln)
+        tag |= METHOD_EXT_TAG;
     }
 
     struct SortBySELAddress :
