@@ -562,39 +562,38 @@ L_dw_leave_$0:
 
 	// cache hit, r11 = method triplet
         // check against hash
-        call __get_secret_cache_keys
-        movq %rax, %rcx
         xorl %r10d, %r10d
+        call __get_secret_cache_keys
 
         // (class_lo + K[0]) * (class_hi + K[1])
-        movq %rdx, %rax
-        shr $32, %rax
-        addl  (%rcx), %eax
-        addl 4(%rcx), %edx
-        mul $rdx
+        movq %rdx, %rcx
+        shr $32, %rcx
+        addl  (%rax), %ecx
+        addl 4(%rax), %edx
+        imul $rcx, %rdx
         addq %rdx, %r10
 
         // (name_ptr_lo + K[2]) * (name_ptr_hi + K[3])
         movq method_name(%r11), %rdx
-        movq %rdx, %rax
-        shr $32, %rax
-        addl  8(%rcx), %eax
-        addl 12(%rcx), %edx
-        mul $rdx
+        movq %rdx, %rcx
+        shr $32, %rcx
+        addl  8(%rax), %ecx
+        addl 12(%rax), %edx
+        imul $rcx, $rdx
         addq %rdx, %r10
 
         // (imp_ptr_lo + K[4]) * (imp_ptr_hi + K[5])
         movq method_imp(%r11), %rdx
-        movq %rdx, %rax
-        shr $32, %rax
-        addl 16(%rcx), %eax
-        addl 20(%rcx), %edx
-        mul $rdx
+        movq %rdx, %rcx
+        shr $32, %rcx
+        addl 16(%rax), %ecx
+        addl 20(%rax), %edx
+        imul $rcx, $rdx
         addq %rdx, %r10
 
         // FIXME: tunable shift/table size
         shr $44, %r10
-        movq 24(%rcx, %r10, 8), %r10
+        movq 24(%rax, %r10, 8), %r10
 
         pop %rdx
         pop %rcx
