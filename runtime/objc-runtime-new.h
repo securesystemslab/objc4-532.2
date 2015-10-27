@@ -24,6 +24,7 @@
 #ifndef _OBJC_RUNTIME_NEW_H
 #define _OBJC_RUNTIME_NEW_H
 
+#include "objc-secrets.h"
 #include "objc-hmac.h"
 
 __BEGIN_DECLS
@@ -130,11 +131,20 @@ struct method_t {
         assert(isExtension());
         return (method_hash_t*) (tag & ~METHOD_EXT_TAG);
     }
-    void transition(method_hash_t* newExt) {
+    void transition(method_hash_t* newExt, class_t* cls) {
         assert(!isExtension());
         newExt->types = oldTypes;
+        newExt->hash = computeHash(cls);
         ext = newExt;
         tag |= METHOD_EXT_TAG;
+    }
+    uint64_t computeHash(class_t* cls) const {
+        __uint128_t tmp =
+            (__uint128_t) cls * get_secret_cls() ^
+            (__uint128_t) name * get_secret_sel() ^
+            (__uint128_t) imp * get_secret_imp();
+        
+        return tmp >> 64;
     }
 
     struct SortBySELAddress :

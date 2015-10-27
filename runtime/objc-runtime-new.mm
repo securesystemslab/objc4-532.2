@@ -4282,7 +4282,7 @@ _protocol_addMethod(method_list_t **list, SEL name, const char *types)
     method_t *meth = method_list_nth(*list, (*list)->count++);
     meth->name = name;
     meth->oldTypes = _strdup_internal(types ? types : "");
-    meth->transition((method_hash_t*) _calloc_internal(sizeof(method_hash_t), 1)); // [coop-defense]
+    meth->transition((method_hash_t*) _calloc_internal(sizeof(method_hash_t), 1), /* cls: */ nullptr); // [coop-defense]
     meth->imp = NULL;
 }
 
@@ -5803,7 +5803,7 @@ addMethod(class_t *cls, SEL name, IMP imp, const char *types, BOOL replace)
         newlist->count = 1;
         newlist->first.name = name;
         newlist->first.oldTypes = strdup(types);
-        newlist->first.transition((method_hash_t*) _calloc_internal(sizeof(method_hash_t), 1)); // [coop-defense]
+        newlist->first.transition((method_hash_t*) _calloc_internal(sizeof(method_hash_t), 1), cls); // [coop-defense]
         if (!ignoreSelector(name)) {
             newlist->first.imp = imp;
         } else {
