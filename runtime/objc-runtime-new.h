@@ -100,7 +100,7 @@ __BEGIN_DECLS
 #   define RW_HAS_CUSTOM_AWZ     (1<<16)
 #endif
 
-#define METHOD_EXT_TAG  (1<<63)
+#define METHOD_EXT_TAG  (1ull<<63)
 
 // classref_t is unremapped class_t*
 typedef struct classref * classref_t;
@@ -117,7 +117,7 @@ struct method_t {
     union {
         const char* oldTypes;
         method_hash_t* ext;
-        uint64_t tag;
+        uintptr_t tag;
     };
     IMP imp;
     

@@ -2704,7 +2704,7 @@ static class_t *realizeClass(class_t *cls)
     FOREACH_METHOD_LIST(mlist, cls, {
         for (uint32_t i = 0; i < mlist->count; ++i) {
             method_t* m = method_list_nth(mlist, i);
-            m->transition((method_hash_t*) _calloc_internal(sizeof(method_hash_t), 1));
+            m->transition((method_hash_t*) _calloc_internal(sizeof(method_hash_t), 1), cls);
         }
     });
 
