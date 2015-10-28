@@ -11,6 +11,7 @@
 
 #include <stdint.h>
 
+extern void secrets_init();
 extern uint8_t* _objc_get_secret_cache_table_ptr();
 extern uint64_t get_secret_slow_path();
 

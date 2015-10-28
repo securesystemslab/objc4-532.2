@@ -822,6 +822,7 @@ void _objc_init(void)
     tls_init();
     lock_init();
     exception_init();
+    secrets_init(); // [coop-defense]
         
     // Register for unmap first, in case some +load unmaps something
     _dyld_register_func_for_remove_image(&unmap_image);

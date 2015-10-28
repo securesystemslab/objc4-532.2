@@ -15,8 +15,8 @@
 
 static uint8_t* randomTable;
 
-__attribute__((constructor))
-static void init_secrets() {
+//__attribute__((constructor)) static
+void secrets_init() {
     randomTable = (uint8_t*) malloc(RANDOM_TABLE_SIZE);
     
     srand(time(NULL));
