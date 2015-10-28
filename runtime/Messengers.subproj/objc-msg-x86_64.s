@@ -325,9 +325,21 @@ LASFDE$0:
 	.byte	DW_CFA_def_cfa_offset	// CFA = rsp+16
 	.byte	16
 	
+	// push_more
+	.byte 	DW_CFA_advance_loc4
+	.long	L_dw_push_more_$0 - L_dw_push_$0
+	.byte	DW_CFA_def_cfa_offset	// CFA = rsp+24
+	.byte	24
+	
+	// pop more
+	.byte 	DW_CFA_advance_loc4
+	.long	L_dw_pop_more_$0 - L_dw_push_more_$0
+	.byte	DW_CFA_def_cfa_offset	// CFA = rsp+16
+	.byte	16
+
 	// pop
 	.byte 	DW_CFA_advance_loc4
-	.long	L_dw_pop_$0 - L_dw_push_$0
+	.long	L_dw_pop_$0 - L_dw_pop_more_$0
 	.byte	DW_CFA_def_cfa_offset	// CFA = rsp+8
 	.byte	8
 
@@ -389,6 +401,16 @@ L_dw_start_$0:
 // After `push` in CacheLookup
 .macro DW_PUSH
 L_dw_push_$0:	
+.endmacro
+
+// After `push` in CacheLookup
+.macro DW_PUSH_MORE
+L_dw_push_more_$0:
+.endmacro
+
+// After `pop` in CacheLookup
+.macro DW_POP_MORE
+L_dw_pop_more_$0:
 .endmacro
 
 // After `pop` in CacheLookup
@@ -510,9 +532,9 @@ L_dw_leave_$0:
 // $2 = register to store the computed hash into
 // modifies registers: %rax, %rcx, %rdx, %r10
 .macro ComputeCacheHash
-.if $0 != %rdx
-        movq $0, %rdx
-.endif
+//.if $0 != %rdx
+//        movq $0, %rdx
+//.endif
 
         xorl %r10d, %r10d
         call __objc_get_secret_cache_table_ptr
@@ -563,7 +585,7 @@ L_dw_leave_$0:
 //	  %r11 = class whose cache is to be searched
 //
 // On exit: (found) method in %r11, stack unchanged, eq/ne set for forwarding
-//	    (not found) jumps to LCacheMiss, %rax on stack
+//	    (not found) jumps to LCacheMiss, %rax and %rdx on stack
 //
 /////////////////////////////////////////////////////////////////////
 
@@ -580,8 +602,8 @@ L_dw_leave_$0:
 .endif
 
         // save class to %rdx for now
-        push %rcx
         push %rdx
+	DW_PUSH_MORE $1
         movq %r11, %rdx
 	
 // search the receiver's cache
@@ -591,7 +613,9 @@ L_dw_leave_$0:
 // a2 or a3 = sel
 1:
 	andl	mask(%r10), %eax		// index &= mask
+	shll    $$1, %eax // FIXME: remove this
 	movq	bucket_entry(%r10, %rax, 8), %r11	// method = cache->buckets[index].e
+	shrl    $$1, %eax // FIXME: remove this
 	incl	%eax				// index++
 	testq	%r11, %r11			// if (method == NULL)
 	je	LCacheMiss_f			//   goto cacheMissLabel
@@ -602,33 +626,32 @@ L_dw_leave_$0:
 .endif
 	jne	1b				//   goto loop
 
-	// cache hit, r11 = method triplet, rax = cache bucket index
+	// cache hit, r11 = method triplet, rax = cache bucket index (+1)
 	// compute and save the location of the bucket hash
 	decl %eax
 	shll $$1, %eax
 	lea bucket_hash(%r10, %rax, 8), %rax	// hash_ptr = &cache->buckets[index].hash
 	push %rax
+	push %rcx
 
         // check against hash
         ComputeCacheHash %rdx, %r11, %r10
 
+	pop %rcx
 	pop %rax
-        pop %rdx
-        pop %rcx
         cmpq (%rax), %r10
-        je 1f
+        jne LCacheMiss_f
 
-        // cache hash check failed
-        // FIXME: do something better here
-        hlt
-
-1:
 	// restore saved registers
+        pop %rdx
+ 	DW_POP_MORE	$1
+
 	pop	%rax
 	DW_POP	$1
 
 .if $0 != STRET
-	// eq (non-stret) flag already set above
+	// set eq (non-stret) flag
+	xorl %r10d, %r10d
 .else
 	// set ne (stret) for forwarding; r11 != 0
 	test	%r11, %r11
@@ -646,7 +669,7 @@ L_dw_leave_$0:
 //		$2 = caller's symbol name for DWARF
 // 		r11 = class to search
 //
-// Stack: ret, rax (pushed by CacheLookup)
+// Stack: ret, rax, rdx (pushed by CacheLookup)
 //
 // On exit: pops registers pushed by CacheLookup
 //	  imp in %r11
@@ -654,6 +677,7 @@ L_dw_leave_$0:
 /////////////////////////////////////////////////////////////////////
 .macro MethodTableLookup
 	
+	pop	%rdx
 	pop	%rax	// saved by CacheLookup
 	DW_MISS_POP $2
 	
@@ -831,6 +855,7 @@ LNilTestSlow:
 LCacheMiss:
 // cache miss, return nil
 	DW_MISS __cache_getMethod
+	pop	%rdx
 	pop	%rax		// pushed by CacheLookup
 	DW_MISS_POP __cache_getMethod
 	xorl	%eax, %eax
@@ -865,6 +890,7 @@ LGetMethodExit:
 LCacheMiss:
 // cache miss, return nil
 	DW_MISS __cache_getImp
+	pop	%rdx
 	pop	%rax		// pushed by CacheLookup
 	DW_MISS_POP __cache_getImp
 	xorl	%eax, %eax
@@ -1637,6 +1663,7 @@ LMsgForwardStretError:
         // FIXME: make sure this isn't exported
         STATIC_ENTRY __objc_compute_cache_hash
 
+	movq	%rdi,	%rdx
         ComputeCacheHash %rdi, %rsi, %rax
         ret
 
