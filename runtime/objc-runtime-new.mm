@@ -2699,14 +2699,6 @@ static class_t *realizeClass(class_t *cls)
     } else {
         addRealizedMetaclass(cls);
     }
-    
-    // [coop-defense]: extend method_t and generate hash to protect cache entries
-    FOREACH_METHOD_LIST(mlist, cls, {
-        for (uint32_t i = 0; i < mlist->count; ++i) {
-            method_t* m = method_list_nth(mlist, i);
-            m->transition((method_hash_t*) _calloc_internal(sizeof(method_hash_t), 1), cls);
-        }
-    });
 
     cls->protect(); // [coop-defense]
     if (supercls) supercls->protect(); // [coop-defense]
@@ -3450,7 +3442,7 @@ const char *
 method_getTypeEncoding(Method m)
 {
     if (!m) return NULL;
-    return newmethod(m)->getTypes(); // [coop-defense]
+    return newmethod(m)->types;
 }
 
 
@@ -3981,7 +3973,7 @@ protocol_copyMethodDescriptionList(Protocol *p,
         for (i = 0; i < count; i++) {
             method_t *m = method_list_nth(mlist, i);
             result[i].name = sel_registerName((const char *)m->name);
-            result[i].types = (char *)m->getTypes(); // [coop-defense]
+            result[i].types = (char *)m->types;
         }
     }
 
@@ -4281,8 +4273,7 @@ _protocol_addMethod(method_list_t **list, SEL name, const char *types)
 
     method_t *meth = method_list_nth(*list, (*list)->count++);
     meth->name = name;
-    meth->oldTypes = _strdup_internal(types ? types : "");
-    meth->transition((method_hash_t*) _calloc_internal(sizeof(method_hash_t), 1), /* cls: */ nullptr); // [coop-defense]
+    meth->types = _strdup_internal(types ? types : "");
     meth->imp = NULL;
 }
 
@@ -5802,8 +5793,7 @@ addMethod(class_t *cls, SEL name, IMP imp, const char *types, BOOL replace)
         newlist->entsize_NEVER_USE = (uint32_t)sizeof(method_t) | fixed_up_method_list;
         newlist->count = 1;
         newlist->first.name = name;
-        newlist->first.oldTypes = strdup(types);
-        newlist->first.transition((method_hash_t*) _calloc_internal(sizeof(method_hash_t), 1), cls); // [coop-defense]
+        newlist->first.types = strdup(types);
         if (!ignoreSelector(name)) {
             newlist->first.imp = imp;
         } else {
@@ -6470,9 +6460,7 @@ static void free_class(class_t *cls)
     FOREACH_METHOD_LIST(mlist, cls, {
         for (i = 0; i < mlist->count; i++) {
             method_t *m = method_list_nth(mlist, i);
-            try_free(m->getTypes());
-            if (m->isExtension()) // [coop-defense]
-                try_free(m->getExt());
+            try_free(m->types);
         }
         try_free(mlist);
     });

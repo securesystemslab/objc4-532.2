@@ -105,47 +105,10 @@ __BEGIN_DECLS
 // classref_t is unremapped class_t*
 typedef struct classref * classref_t;
 
-// [coop-defense]: make additional space in method_t struct to hold a hash
-typedef struct {
-    const char* types;
-    uint64_t hash;
-} method_hash_t;
-
 struct method_t {
     SEL name;
-//    const char *types; // [coop-defense]: replace with pointer to method_hash_t
-    union {
-        const char* oldTypes;
-        method_hash_t* ext;
-        uintptr_t tag;
-    };
+    const char *types;
     IMP imp;
-    
-    boolean_t isExtension() const {
-        return (tag & METHOD_EXT_TAG) != 0;
-    }
-    const char* getTypes() const {
-        return isExtension() ? getExt()->types : oldTypes;
-    }
-    method_hash_t* getExt() const {
-        assert(isExtension());
-        return (method_hash_t*) (tag & ~METHOD_EXT_TAG);
-    }
-    void transition(method_hash_t* newExt, class_t* cls) {
-        assert(!isExtension());
-        newExt->types = oldTypes;
-        newExt->hash = computeHash(cls);
-        ext = newExt;
-        tag |= METHOD_EXT_TAG;
-    }
-    uint64_t computeHash(class_t* cls) const {
-        __uint128_t tmp =
-            (__uint128_t) cls * get_secret_cls() ^
-            (__uint128_t) name * get_secret_sel() ^
-            (__uint128_t) imp * get_secret_imp();
-        
-        return tmp >> 64;
-    }
 
     struct SortBySELAddress :
         public std::binary_function<const method_t&,
