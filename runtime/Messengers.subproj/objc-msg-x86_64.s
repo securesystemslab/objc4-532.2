@@ -161,15 +161,13 @@ _objc_exitPoints:
 
 // Method descriptor
 #define method_name 	0
-#define method_hash_ptr 8
 #define method_imp 	16
-
-#define method_hash     0 // FIXME: match this with objc-runtime-new.h
 
 // Cache header
 #define mask		0
 #define occupied	8
-#define buckets		16
+#define bucket_entry	16
+#define bucket_hash	24
 
 // typedef struct {
 //	uint128_t floatingPointArgs[8];	// xmm0..xmm7
@@ -510,6 +508,7 @@ L_dw_leave_$0:
 // $0 = register holding pointer to class structure
 // $1 = register holding pointer to cache_entry structure
 // $2 = register to store the computed hash into
+// modifies registers: %rax, %rcx, %rdx, %r10
 .macro ComputeCacheHash
 .if $0 != %rdx
         movq $0, %rdx
@@ -592,9 +591,7 @@ L_dw_leave_$0:
 // a2 or a3 = sel
 1:
 	andl	mask(%r10), %eax		// index &= mask
-	shll    $$1, %eax // FIXME: remove this
-	movq	buckets(%r10, %rax, 8), %r11	// method = cache->buckets[index]
-	shrl    $$1, %eax // FIXME: remove this
+	movq	bucket_entry(%r10, %rax, 8), %r11	// method = cache->buckets[index].e
 	incl	%eax				// index++
 	testq	%r11, %r11			// if (method == NULL)
 	je	LCacheMiss_f			//   goto cacheMissLabel
@@ -605,14 +602,20 @@ L_dw_leave_$0:
 .endif
 	jne	1b				//   goto loop
 
-	// cache hit, r11 = method triplet
+	// cache hit, r11 = method triplet, rax = cache bucket index
+	// compute and save the location of the bucket hash
+	decl %eax
+	shll $$1, %eax
+	lea bucket_hash(%r10, %rax, 8), %rax	// hash_ptr = &cache->buckets[index].hash
+	push %rax
+
         // check against hash
         ComputeCacheHash %rdx, %r11, %r10
 
+	pop %rax
         pop %rdx
         pop %rcx
-        movq method_hash_ptr(%r11), %rax
-        cmpq method_hash(%rax), %r10
+        cmpq (%rax), %r10
         je 1f
 
         // cache hash check failed
