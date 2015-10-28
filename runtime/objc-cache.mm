@@ -108,13 +108,18 @@ typedef struct {
 # define CACHE_HASH(sel, mask) (((unsigned int)((uintptr_t)(sel)>>0)) & (mask))
 #endif
 
+struct cache_bucket {
+    cache_entry *e;
+    uint64_t hash;
+};
+
 struct objc_cache {
     uintptr_t mask;            /* total = mask + 1 */
     uintptr_t occupied;        
-    cache_entry *buckets[1];
+    cache_bucket buckets[1];
 };
 
-#define CACHE_BUCKET(e) ((cache_entry *)e)
+#define CACHE_BUCKET(e) ((cache_bucket)e)
 
 #else
 
@@ -142,7 +147,7 @@ enum {
 
 /* Amount of space required for `count` hash table buckets, knowing that
  * one entry is embedded in the cache structure itself. */
-#define TABLE_SIZE(count)  ((count - 1) * sizeof(cache_entry *))
+#define TABLE_SIZE(count)  ((count - 1) * sizeof(cache_bucket))
 
 
 #if !TARGET_OS_WIN32
@@ -152,13 +157,13 @@ enum {
 /* Custom cache allocator parameters.
  * CACHE_REGION_SIZE must be a multiple of CACHE_QUANTUM. */
 #define CACHE_ALLOCATOR_MIN 512
-#define CACHE_QUANTUM (CACHE_ALLOCATOR_MIN+sizeof(struct objc_cache)-sizeof(cache_entry*))
+#define CACHE_QUANTUM (CACHE_ALLOCATOR_MIN+sizeof(struct objc_cache)-sizeof(cache_bucket))
 #define CACHE_REGION_SIZE ((128*1024 / CACHE_QUANTUM) * CACHE_QUANTUM)
 // #define CACHE_REGION_SIZE ((256*1024 / CACHE_QUANTUM) * CACHE_QUANTUM)
 
 static uintptr_t cache_allocator_mask_for_size(size_t size)
 {
-    return (size - sizeof(struct objc_cache)) / sizeof(cache_entry *);
+    return (size - sizeof(struct objc_cache)) / sizeof(cache_bucket);
 }
 
 static size_t cache_allocator_size_for_mask(uintptr_t mask)
@@ -217,7 +222,7 @@ struct objc_cache _objc_empty_cache =
 {
     0,        // mask
     0,        // occupied
-    { NULL }  // buckets
+    { { NULL, 0 } }  // buckets
 };
 #ifdef OBJC_INSTRUMENTED
 CacheInstrumentation emptyCacheInstrumentation = {0};
@@ -374,7 +379,7 @@ void _cache_free(Cache cache)
     mutex_lock(&cacheUpdateLock);
 
     for (i = 0; i < cache->mask + 1; i++) {
-        cache_entry *entry = (cache_entry *)cache->buckets[i];
+        cache_entry *entry = (cache_entry *)cache->buckets[i].e;
         if (entry  &&  entry->imp == _objc_msgForward_internal) {
             _cache_free_block(entry);
         }
@@ -454,14 +459,14 @@ static Cache _cache_expand(Class cls)
             {
                 // Remember what this entry was, so we can possibly
                 // deallocate it after the bucket has been invalidated
-                cache_entry *oldEntry = (cache_entry *)old_cache->buckets[index];
+                cache_entry *oldEntry = (cache_entry *)old_cache->buckets[index].e;
                 
                 // Skip invalid entry
                 if (!oldEntry)
                     continue;
 
                 // Invalidate this entry
-                old_cache->buckets[index] = NULL;
+                old_cache->buckets[index].e = NULL;
 
                 // Deallocate "forward::" entry
                 if (oldEntry->imp == _objc_msgForward_internal) {
@@ -493,7 +498,7 @@ static Cache _cache_expand(Class cls)
 
     // Deallocate "forward::" entries from the old cache
     for (index = 0; index < old_cache->mask + 1; index++) {
-        cache_entry *entry = (cache_entry *)old_cache->buckets[index];
+        cache_entry *entry = (cache_entry *)old_cache->buckets[index].e;
         if (entry && entry->imp == _objc_msgForward_internal) {
             _cache_collect_free (entry, sizeof(cache_entry));
         }
@@ -503,7 +508,7 @@ static Cache _cache_expand(Class cls)
     _class_setCache(cls, new_cache);
 
     // Deallocate old cache, try freeing all the garbage
-    _cache_collect_free (old_cache, old_cache->mask * sizeof(cache_entry *));
+    _cache_collect_free (old_cache, old_cache->mask * sizeof(cache_bucket));
     _cache_collect(false);
 
     return new_cache;
@@ -524,7 +529,7 @@ BOOL _cache_fill(Class cls, Method smt, SEL sel)
 {
     uintptr_t newOccupied;
     uintptr_t index;
-    cache_entry **buckets;
+    cache_bucket *buckets;
     cache_entry *entry;
     Cache cache;
 
@@ -569,14 +574,14 @@ BOOL _cache_fill(Class cls, Method smt, SEL sel)
     // Scan for the first unused slot and insert there.
     // There is guaranteed to be an empty slot because the 
     // minimum size is 4 and we resized at 3/4 full.
-    buckets = (cache_entry **)cache->buckets;
+    buckets = (cache_bucket *)cache->buckets;
     for (index = CACHE_HASH(sel, cache->mask); 
-         buckets[index] != NULL; 
+         buckets[index].e != NULL;
          index = (index+1) & cache->mask)
     {
         // empty
     }
-    buckets[index] = entry;
+    buckets[index].e = entry;
 
     mutex_unlock(&cacheUpdateLock);
 
@@ -695,10 +700,10 @@ void _cache_flush(Class cls)
     {
         // Remember what this entry was, so we can possibly
         // deallocate it after the bucket has been invalidated
-        cache_entry *oldEntry = (cache_entry *)cache->buckets[index];
+        cache_entry *oldEntry = (cache_entry *)cache->buckets[index].e;
 
         // Invalidate this entry
-        cache->buckets[index] = NULL;
+        cache->buckets[index].e = NULL;
 
         // Deallocate "forward::" entry
         if (oldEntry && oldEntry->imp == _objc_msgForward_internal)
@@ -1296,7 +1301,7 @@ static void _cache_print(Cache cache)
 
     count = cache->mask + 1;
     for (index = 0; index < count; index += 1) {
-        cache_entry *entry = (cache_entry *)cache->buckets[index];
+        cache_entry *entry = (cache_entry *)cache->buckets[index].e;
         if (entry) {
             if (entry->imp == _objc_msgForward_internal)
                 printf ("does not recognize: \n");
@@ -1558,7 +1563,7 @@ void _class_printMethodCacheStatistics(void)
             maxMissChain = 0;
             for (index = 0; index < mask + 1; index += 1)
             {
-                cache_entry **buckets;
+                cache_bucket *buckets;
                 cache_entry *entry;
                 unsigned int hash;
                 unsigned int methodChain;
@@ -1568,14 +1573,14 @@ void _class_printMethodCacheStatistics(void)
                 // If entry is invalid, the only item of
                 // interest is that future insert hashes
                 // to this entry can use it directly.
-                buckets = (cache_entry **)cache->buckets;
-                if (!buckets[index])
+                buckets = (cache_bucket *)cache->buckets;
+                if (!buckets[index].e)
                 {
                     missChainCount[0] += 1;
                     continue;
                 }
 
-                entry = buckets[index];
+                entry = buckets[index].e;
 
                 // Tally valid entries
                 entryCount += 1;
@@ -1603,7 +1608,7 @@ void _class_printMethodCacheStatistics(void)
 
                 // Calculate search distance for miss that hashes here
                 index2 = index;
-                while (buckets[index2])
+                while (buckets[index2].e)
                 {
                     index2 += 1;
                     index2 &= mask;
@@ -1864,8 +1869,8 @@ void _class_printMethodCacheStatistics(void)
         }
 
         printf ("\nTotal memory usage for cache data structures: %lu bytes\n",
-                totalCacheCount * (sizeof(struct objc_cache) - sizeof(cache_entry *)) +
-                totalSlots * sizeof(cache_entry *) +
+                totalCacheCount * (sizeof(struct objc_cache) - sizeof(cache_bucket)) +
+                totalSlots * sizeof(cache_bucket) +
                 negativeEntryCount * sizeof(cache_entry));
 #endif
     }

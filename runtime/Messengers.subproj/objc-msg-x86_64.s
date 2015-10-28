@@ -541,7 +541,9 @@ L_dw_leave_$0:
 // a2 or a3 = sel
 1:
 	andl	mask(%r10), %eax		// index &= mask
+	shll    $$1, %eax // FIXME: remove this
 	movq	buckets(%r10, %rax, 8), %r11	// method = cache->buckets[index]
+	shrl    $$1, %eax // FIXME: remove this
 	incl	%eax				// index++
 	testq	%r11, %r11			// if (method == NULL)
 	je	LCacheMiss_f			//   goto cacheMissLabel
