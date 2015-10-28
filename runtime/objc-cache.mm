@@ -514,7 +514,7 @@ static Cache _cache_expand(Class cls)
     return new_cache;
 }
 
-extern uint64_t _objc_compute_cache_hash(Class cls, cache_entry* e); // [coop-defense]
+extern "C" uint64_t _objc_compute_cache_hash(Class cls, cache_entry* e); // [coop-defense]
 
 /***********************************************************************
 * _cache_fill.  Add the specified method to the specified class' cache.

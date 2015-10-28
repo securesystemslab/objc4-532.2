@@ -8,7 +8,7 @@
 
 #include "objc-secrets.h"
 
-#include <cstdlib>
+#include "objc-private.h"
 #include <ctime>
 
 #define RANDOM_TABLE_SIZE (6 * 4 + 1048576 * 8) // 1048576 = 2^20
@@ -17,7 +17,7 @@ static uint8_t* randomTable;
 
 //__attribute__((constructor)) static
 void secrets_init() {
-    randomTable = (uint8_t*) malloc(RANDOM_TABLE_SIZE);
+    randomTable = (uint8_t*) _malloc_internal(RANDOM_TABLE_SIZE);
     
     srand(time(NULL));
     for (uint64_t i = 0; i < RANDOM_TABLE_SIZE; ++i) {
@@ -25,6 +25,7 @@ void secrets_init() {
     }
 }
 
+extern "C"
 uint8_t* _objc_get_secret_cache_table_ptr() {
     return randomTable;
 }
