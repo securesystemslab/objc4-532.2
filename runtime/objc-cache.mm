@@ -108,7 +108,7 @@ typedef struct {
 # define CACHE_HASH(sel, mask) (((unsigned int)((uintptr_t)(sel)>>0)) & (mask))
 #endif
 
-struct cache_bucket {
+struct cache_bucket { // [coop-defense]
     cache_entry *e;
     uint64_t hash;
 };
@@ -514,6 +514,7 @@ static Cache _cache_expand(Class cls)
     return new_cache;
 }
 
+extern uint64_t _objc_compute_cache_hash(Class cls, cache_entry* e); // [coop-defense]
 
 /***********************************************************************
 * _cache_fill.  Add the specified method to the specified class' cache.
@@ -582,6 +583,7 @@ BOOL _cache_fill(Class cls, Method smt, SEL sel)
         // empty
     }
     buckets[index].e = entry;
+    buckets[index].hash = _objc_compute_cache_hash(cls, entry); // [coop-defense]
 
     mutex_unlock(&cacheUpdateLock);
 

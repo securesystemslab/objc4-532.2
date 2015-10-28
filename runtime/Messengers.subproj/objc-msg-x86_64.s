@@ -1630,7 +1630,7 @@ LMsgForwardStretError:
 	END_ENTRY __objc_ignored_method
 
 
-        // uint64_t __objc_compute_cache_hash(Class cls, struct cache_entry *e)
+        // uint64_t _objc_compute_cache_hash(Class cls, struct cache_entry *e)
         // FIXME: make sure this isn't exported
         STATIC_ENTRY __objc_compute_cache_hash
 
