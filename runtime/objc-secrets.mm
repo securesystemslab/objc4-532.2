@@ -8,16 +8,25 @@
 
 #include "objc-secrets.h"
 
-uint64_t get_secret_cls() {
-    return 11;
+#include <cstdlib>
+#include <ctime>
+
+#define RANDOM_TABLE_SIZE (6 * 4 + 1048576 * 8) // 1048576 = 2^20
+
+static uint8_t* randomTable;
+
+__attribute__((constructor))
+static void init_secrets() {
+    randomTable = (uint8_t*) malloc(RANDOM_TABLE_SIZE);
+    
+    srand(time(NULL));
+    for (uint64_t i = 0; i < RANDOM_TABLE_SIZE; ++i) {
+        randomTable[i] = (uint8_t)rand();
+    }
 }
 
-uint64_t get_secret_sel() {
-    return 13;
-}
-
-uint64_t get_secret_imp() {
-    return 15;
+uint8_t* _objc_get_secret_cache_table_ptr() {
+    return randomTable;
 }
 
 uint64_t get_secret_slow_path() {
