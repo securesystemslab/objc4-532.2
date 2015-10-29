@@ -527,14 +527,16 @@ L_dw_leave_$0:
 .endmacro
 
 // Cache hash-related macros and functions
-// $0 = register holding pointer to class structure
-// $1 = register holding pointer to cache_entry structure
-// $2 = register to store the computed hash into
-// modifies registers: %rax, %rcx, %rdx, %r10
+// %rdx = register holding pointer to class structure
+//   $0 = whether to save registers (rax, rcx)
+//   $1 = register holding pointer to cache_entry structure
+//   $2 = register to store the computed hash into
+// modifies registers: %rax (if $0 == 0), %rcx (if $0 == 0), %rdx, %r10
 .macro ComputeCacheHash
-//.if $0 != %rdx
-//        movq $0, %rdx
-//.endif
+.if $0 != 0
+	push %rax
+	push %rcx
+.endif
 
         xorl %r10d, %r10d
         call __objc_get_secret_cache_table_ptr
@@ -542,8 +544,8 @@ L_dw_leave_$0:
         // (class_lo + K[0]) * (class_hi + K[1])
         movq %rdx, %rcx
         shr $$32, %rcx
-        addl  (%rax), %ecx
-        addl 4(%rax), %edx
+        addl  (%rax), %edx
+        addl 4(%rax), %ecx
         imul %rcx, %rdx
         addq %rdx, %r10
 
@@ -551,8 +553,8 @@ L_dw_leave_$0:
         movq method_name($1), %rdx
         movq %rdx, %rcx
         shr $$32, %rcx
-        addl  8(%rax), %ecx
-        addl 12(%rax), %edx
+        addl  8(%rax), %edx
+        addl 12(%rax), %ecx
         imul %rcx, %rdx
         addq %rdx, %r10
 
@@ -560,8 +562,8 @@ L_dw_leave_$0:
         movq method_imp($1), %rdx
         movq %rdx, %rcx
         shr $$32, %rcx
-        addl 16(%rax), %ecx
-        addl 20(%rax), %edx
+        addl 16(%rax), %edx
+        addl 20(%rax), %ecx
         imul %rcx, %rdx
         addq %rdx, %r10
 
@@ -569,6 +571,39 @@ L_dw_leave_$0:
         shr $$44, %r10
         movq 24(%rax, %r10, 8), $2
 
+.if $0 != 0
+	pop %rcx
+	pop %rax
+.endif
+.endmacro
+
+// %r11 = pointer to handler
+//   $0 = whether to save registers
+//   $1 = result register
+.macro ComputeForwardHash
+.if $0 != 0
+	push %rax
+	push %rdx
+.endif
+
+        call __objc_get_secret_cache_table_ptr
+
+        // (forward_handler_lo + K[2]) * (forward_handler_hi + K[3])
+	movq %r11, %rdx
+	movq %r11, %r10
+        shr $$32, %r10
+        addl 16(%rax), %edx
+        addl 20(%rax), %r10d
+        imul %rdx, %r10
+
+        // FIXME: tunable shift/table size
+        shr $$44, %r10
+        movq 24(%rax, %r10, 8), $1
+
+.if $0 != 0
+	pop %rdx
+	pop %rax
+.endif
 .endmacro
 
 /////////////////////////////////////////////////////////////////////
@@ -631,14 +666,9 @@ L_dw_leave_$0:
 	decl %eax
 	shll $$1, %eax
 	lea bucket_hash(%r10, %rax, 8), %rax	// hash_ptr = &cache->buckets[index].hash
-	push %rax
-	push %rcx
 
         // check against hash
-        ComputeCacheHash %rdx, %r11, %r10
-
-	pop %rcx
-	pop %rax
+        ComputeCacheHash 1, %r11, %r10
         cmpq (%rax), %r10
         jne LCacheMiss_f
 
@@ -1429,15 +1459,25 @@ _FwdSel: .quad 0
 	.align 3
 LUnkSelStr: .ascii "Does not recognize selector %s (while forwarding %s)\0"
 
+	.cstring
+	.align 3
+LForwardHashFailStr: .ascii "Forward handler hash failure\0"
+
 	.data
 	.align 3
 	.private_extern __objc_forward_handler
 __objc_forward_handler:	.quad 0
 
+	.private_extern __objc_forward_hash
+__objc_forward_hash:	.quad 0
+
 	.data
 	.align 3
 	.private_extern __objc_forward_stret_handler
 __objc_forward_stret_handler:	.quad 0
+
+	.private_extern __objc_forward_stret_hash
+__objc_forward_stret_hash:	.quad 0
 
 
 	STATIC_ENTRY	__objc_msgForward_internal
@@ -1459,6 +1499,10 @@ __objc_forward_stret_handler:	.quad 0
 	movq	__objc_forward_handler(%rip), %r11
 	testq	%r11, %r11		// if (handler == NULL)
 	je	1f			//   skip handler
+
+	ComputeForwardHash 1, %r10
+	cmp __objc_forward_hash(%rip), %r10
+	jne LMsgForwardHashFailError
 	jmp	*%r11			// else goto handler
 1:	
 	// No user handler
@@ -1525,6 +1569,11 @@ LMsgForwardError:
 	movq	_FwdSel(%rip), %a3	// forward::
 	jmp	___objc_error		// never returns
 
+LMsgForwardHashFailError:
+	// %a1 is already the receiver
+	leaq	LForwardHashFailStr(%rip), %a2
+	jmp	___objc_error		// never returns
+
 	END_ENTRY	__objc_msgForward
 
 
@@ -1535,6 +1584,10 @@ LMsgForwardError:
 	movq	__objc_forward_stret_handler(%rip), %r11
 	testq	%r11, %r11		// if (handler == NULL)
 	je	1f			//   skip handler
+
+	ComputeForwardHash 1, %r10
+	cmp __objc_forward_stret_hash(%rip), %r10
+	jne LMsgForwardStretHashFailError
 	jmp	*%r11			// else goto handler
 1:	
 	// No user handler
@@ -1600,7 +1653,25 @@ LMsgForwardStretError:
 	movq	_FwdSel(%rip), %a3	// forward::
 	jmp	___objc_error		// never returns
 
+LMsgForwardStretHashFailError:
+	// %a1 is already the receiver
+	leaq	LForwardHashFailStr(%rip), %a2
+	jmp	___objc_error		// never returns
+
 	END_ENTRY	__objc_msgForward_stret
+
+	STATIC_ENTRY __objc_compute_forward_hashes
+	// compute the hashes one by one
+	movq	__objc_forward_handler(%rip), %r11
+	ComputeForwardHash 0, %rax
+	mov %rax, __objc_forward_hash(%rip)
+
+	movq	__objc_forward_stret_handler(%rip), %r11
+	ComputeForwardHash 0, %rax
+	mov %rax, __objc_forward_stret_hash(%rip)
+
+	ret
+	END_ENTRY
 
 
 	ENTRY _objc_msgSend_debug
@@ -1664,7 +1735,7 @@ LMsgForwardStretError:
         STATIC_ENTRY __objc_compute_cache_hash
 
 	movq	%rdi,	%rdx
-        ComputeCacheHash %rdi, %rsi, %rax
+        ComputeCacheHash 0, %rsi, %rax
         ret
 
         END_ENTRY __objc_compute_cache_hash

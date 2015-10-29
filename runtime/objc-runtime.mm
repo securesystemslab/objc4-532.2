@@ -514,6 +514,7 @@ void objc_setForwardHandler(void *fwd, void *fwd_stret)
 {
     _objc_forward_handler = fwd;
     _objc_forward_stret_handler = fwd_stret;
+    _objc_compute_forward_hashes();
 }
 
 

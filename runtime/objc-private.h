@@ -423,6 +423,8 @@ extern id _objc_getNilReceiver(void);
 extern void *_objc_forward_handler;
 extern void *_objc_forward_stret_handler;
 
+extern "C" void _objc_compute_forward_hashes();
+
 /* tagged pointer support */
 #if SUPPORT_TAGGED_POINTERS
 
