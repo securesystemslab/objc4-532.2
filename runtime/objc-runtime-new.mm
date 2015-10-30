@@ -6821,7 +6821,7 @@ _objc_fixupMessageRef(id obj, struct objc_super2 *supr, message_ref_t *msg)
 
     if (ignoreSelector(msg->sel)) {
         // ignored selector - bypass dispatcher
-        msg->imp = (IMP)&vtable_ignored;
+//        msg->imp = (IMP)&vtable_ignored;
         imp = (IMP)&_objc_ignored_method;
     }
 #if SUPPORT_VTABLE
