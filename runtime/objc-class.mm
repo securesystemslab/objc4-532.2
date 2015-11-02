@@ -909,6 +909,7 @@ log_and_fill_cache(Class cls, Class implementer, Method meth, SEL sel)
         _cache_fill (cls, meth, sel);
 }
 
+extern uint64_t _objc_msgSend_counter;
 
 /***********************************************************************
 * _class_lookupMethodAndLoadCache.
@@ -918,6 +919,7 @@ log_and_fill_cache(Class cls, Class implementer, Method meth, SEL sel)
 **********************************************************************/
 IMP _class_lookupMethodAndLoadCache3(id obj, SEL sel, Class cls)
 {        
+    printf("msgSend invocations: %llu\n", _objc_msgSend_counter);
     return lookUpMethod(cls, sel, YES/*initialize*/, NO/*cache*/, obj);
 }
 
