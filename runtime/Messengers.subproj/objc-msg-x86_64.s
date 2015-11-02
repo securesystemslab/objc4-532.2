@@ -805,6 +805,13 @@ LGetImpExit:
 	END_ENTRY 	__cache_getImp
 
 
+// [coop-defense]: Increment msgSend counter
+.macro IncMsgSend
+	movq	__objc_msgSend_counter(%rip), %r11
+	incq	%r11
+	movq	%r11, __objc_msgSend_counter(%rip)
+.endmacro
+
 /********************************************************************
  *
  * id objc_msgSend(id self, SEL	_cmd,...);
@@ -817,8 +824,16 @@ LGetImpExit:
 __objc_tagged_isa_table:
 	.fill 16, 8, 0
 
+	.data
+	.align 3
+	.private_extern __objc_msgSend_counter
+__objc_msgSend_counter: .quad 0
+
+
 	ENTRY	_objc_msgSend
 	DW_START _objc_msgSend
+
+	IncMsgSend
 
 	NilTest	NORMAL
 
@@ -992,6 +1007,8 @@ LCacheMiss:
 	ENTRY	_objc_msgSend_fpret
 	DW_START _objc_msgSend_fpret
 
+	IncMsgSend
+
 	NilTest	FPRET
 
 	GetIsaFast FPRET		// r11 = self->isa
@@ -1066,6 +1083,8 @@ LCacheMiss:
 
 	ENTRY	_objc_msgSend_fp2ret
 	DW_START _objc_msgSend_fp2ret
+
+	IncMsgSend
 
 	NilTest	FP2RET
 
@@ -1147,6 +1166,8 @@ LCacheMiss:
 
 	ENTRY	_objc_msgSend_stret
 	DW_START _objc_msgSend_stret
+
+	IncMsgSend
 
 	NilTest	STRET
 
