@@ -807,9 +807,7 @@ LGetImpExit:
 
 // [coop-defense]: Increment msgSend counter
 .macro IncMsgSend
-	movq	__objc_msgSend_counter(%rip), %r11
-	incq	%r11
-	movq	%r11, __objc_msgSend_counter(%rip)
+	incq	__objc_msgSend_counter(%rip)
 .endmacro
 
 /********************************************************************
