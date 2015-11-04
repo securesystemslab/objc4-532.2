@@ -90,7 +90,7 @@
 #if !SUPPORT_FIXUP
 #   define SUPPORT_VTABLE 0
 #else
-#   define SUPPORT_VTABLE 1
+#   define SUPPORT_VTABLE 0
 #endif
 
 // Define SUPPORT_IGNORED_SELECTOR_CONSTANT to remap GC-ignored selectors.
