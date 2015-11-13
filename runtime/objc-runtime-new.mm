@@ -68,6 +68,11 @@ id objc_noop_imp(id self, SEL _cmd __unused) {
     return self;
 }
 
+// [coop-defense]: instrumentation
+uint64_t counter_computeHash;
+uint64_t counter_verify;
+uint64_t counter_protect;
+
 /***********************************************************************
 * Lock management
 * Every lock used anywhere must be managed here. 

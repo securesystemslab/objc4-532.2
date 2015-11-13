@@ -334,6 +334,10 @@ typedef struct class_rw_t {
 // Defined in [objc-runtime-new.mm]
 extern const char* getName(class_t* cls);
 
+extern uint64_t counter_computeHash;
+extern uint64_t counter_verify;
+extern uint64_t counter_protect;
+
 typedef struct class_t {
     struct class_t *isa;
     struct class_t *superclass;
@@ -345,6 +349,10 @@ typedef struct class_t {
     uintptr_t data_NEVER_USE;  // class_rw_t * plus custom rr/alloc flags
 
     uint64_t computeHash() const {
+        counter_computeHash++;
+//        if (counter_computeHash % 100 == 0)
+        printf("%llu, %llu, %llu\n", counter_protect, counter_verify, counter_computeHash);
+        
         HMAC_MD5_CTX ctx;
         hmac_init(&ctx);
         
@@ -366,10 +374,12 @@ typedef struct class_t {
     }
     void protect() {
         assert(this != nullptr);
+        counter_protect++;
         hash = computeHash();
     }
     void verify_() const {
         assert(this != nullptr);
+        counter_verify++;
         uint64_t h = computeHash();
         if (h != hash) {
             fprintf(stderr,
