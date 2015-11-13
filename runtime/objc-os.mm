@@ -817,21 +817,26 @@ void _objc_init(void)
     static bool initialized = false;
     if (initialized) return;
     initialized = true;
-    
+
+    struct timeval t0, t1, t2;
+
+    gettimeofday(&t0, NULL);
     // fixme defer initialization until an objc-using image is found?
     environ_init();
     tls_init();
     lock_init();
     exception_init();
-    
-    struct timeval  s, e;
-    gettimeofday(&s, NULL);
-    
+
+    gettimeofday(&t1, NULL);
     secrets_init(); // [coop-defense]
+    gettimeofday(&t2, NULL);
+
+    printf("secrets_init:\t%d us\n", (t2.tv_usec - t1.tv_usec));
+    printf("_objc_init:\t\t%d us\n", (t2.tv_usec - t0.tv_usec));
+
+    // Calls below invoke the image handlers (and read_images) which require the
+    // initialized secrets table.
     
-    gettimeofday(&e, NULL);
-    printf("secrets_init: %d us\n", (e.tv_usec - s.tv_usec));
-        
     // Register for unmap first, in case some +load unmaps something
     _dyld_register_func_for_remove_image(&unmap_image);
     dyld_register_image_state_change_handler(dyld_image_state_bound,
