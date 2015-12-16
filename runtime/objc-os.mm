@@ -809,6 +809,7 @@ unmap_image_nolock(const struct mach_header *mh)
 * New ABI: called by libSystem BEFORE library initialization time
 **********************************************************************/
 #if !__OBJC2__
+#include "objc-secrets.h" // [coop-defense] 32bit
 static __attribute__((constructor))
 #endif
 void _objc_init(void)
