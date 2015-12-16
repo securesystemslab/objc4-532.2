@@ -255,6 +255,7 @@
 		513A037619B4B13100448729 /* cpu_capabilities.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = cpu_capabilities.h; sourceTree = "<group>"; };
 		513A037719B4B13100448729 /* pthread_machdep.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = pthread_machdep.h; sourceTree = "<group>"; };
 		513A037819B4B13100448729 /* vproc_priv.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = vproc_priv.h; sourceTree = "<group>"; };
+		5309B6D41C2215F500E9A884 /* setjmp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = setjmp.h; path = i386/setjmp.h; sourceTree = "<group>"; };
 		532745091BD995CE00A2E6F0 /* objc-secrets.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = "objc-secrets.mm"; path = "runtime/objc-secrets.mm"; sourceTree = "<group>"; };
 		5327450C1BD9960800A2E6F0 /* objc-secrets.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "objc-secrets.h"; path = "runtime/objc-secrets.h"; sourceTree = "<group>"; };
 		538379411BCD9B8400709511 /* objc-hmac.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "objc-hmac.h"; path = "runtime/objc-hmac.h"; sourceTree = "<group>"; };
@@ -465,6 +466,7 @@
 				513A036F19B4B13100448729 /* objc-shared-cache.h */,
 				513A037819B4B13100448729 /* vproc_priv.h */,
 				513A034319B4B13100448729 /* dispatch */,
+				5309B6D11C2215A200E9A884 /* i386 */,
 				513A034819B4B13100448729 /* libkern */,
 				513A034A19B4B13100448729 /* mach */,
 				513A034F19B4B13100448729 /* mach-o */,
@@ -581,6 +583,14 @@
 				513A037619B4B13100448729 /* cpu_capabilities.h */,
 			);
 			path = ppc;
+			sourceTree = "<group>";
+		};
+		5309B6D11C2215A200E9A884 /* i386 */ = {
+			isa = PBXGroup;
+			children = (
+				5309B6D41C2215F500E9A884 /* setjmp.h */,
+			);
+			name = i386;
 			sourceTree = "<group>";
 		};
 		838485B20D6D67F900CEA253 /* Other */ = {
