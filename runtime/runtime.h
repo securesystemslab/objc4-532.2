@@ -517,11 +517,11 @@ typedef struct objc_cache *Cache                             OBJC2_UNAVAILABLE;
 #else
 #define CACHE_HASH(sel, mask) (((unsigned int)((uintptr_t)(sel)>>3)) & (mask))
 #endif
-struct objc_cache {
-    unsigned int mask /* total = mask + 1 */                 OBJC2_UNAVAILABLE;
-    unsigned int occupied                                    OBJC2_UNAVAILABLE;
-    Method buckets[1]                                        OBJC2_UNAVAILABLE;
-};
+//struct objc_cache { // [coop-defense] 32bit
+//    unsigned int mask /* total = mask + 1 */                 OBJC2_UNAVAILABLE;
+//    unsigned int occupied                                    OBJC2_UNAVAILABLE;
+//    Method buckets[1]                                        OBJC2_UNAVAILABLE;
+//};
 
 
 typedef struct objc_module *Module                           OBJC2_UNAVAILABLE;

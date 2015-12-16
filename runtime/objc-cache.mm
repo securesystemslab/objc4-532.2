@@ -100,6 +100,21 @@ typedef struct {
     IMP imp;  // same layout as struct old_method
 } cache_entry;
 
+
+struct cache_bucket { // [coop-defense] 32bit
+    cache_entry *e;
+    uint64_t hash;
+};
+
+struct objc_cache { // [coop-defense] 32bit
+    uintptr_t mask;            /* total = mask + 1 */
+    uintptr_t occupied;
+    cache_bucket buckets[1];
+};
+
+#define CACHE_BUCKET(e) ((cache_bucket)e) // [coop-defense] 32bit
+
+
 #if __OBJC2__
 
 #ifndef __LP64__
@@ -108,23 +123,23 @@ typedef struct {
 # define CACHE_HASH(sel, mask) (((unsigned int)((uintptr_t)(sel)>>0)) & (mask))
 #endif
 
-struct cache_bucket { // [coop-defense]
-    cache_entry *e;
-    uint64_t hash;
-};
-
-struct objc_cache {
-    uintptr_t mask;            /* total = mask + 1 */
-    uintptr_t occupied;        
-    cache_bucket buckets[1];
-};
-
-#define CACHE_BUCKET(e) ((cache_bucket)e)
+//struct cache_bucket { // [coop-defense]
+//    cache_entry *e;
+//    uint64_t hash;
+//};
+//
+//struct objc_cache {
+//    uintptr_t mask;            /* total = mask + 1 */
+//    uintptr_t occupied;        
+//    cache_bucket buckets[1];
+//};
+//
+//#define CACHE_BUCKET(e) ((cache_bucket)e)
 
 #else
 
 /* Most definitions are in runtime.h */
-#define CACHE_BUCKET(e) ((Method)e)
+//#define CACHE_BUCKET(e) ((Method)e)
 
 #endif
 
