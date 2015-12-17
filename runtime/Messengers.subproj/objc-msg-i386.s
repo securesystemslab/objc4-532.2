@@ -119,7 +119,8 @@ _objc_exitPoints:
 // Cache header
 	mask            = 0
 	occupied        = 4
-	buckets         = 8		// variable length array
+	bucket_entry    = 8     // [coop-defense] 32bit
+    bucket_hash     = 12
 
 #if defined(OBJC_INSTRUMENTED)
 // Cache instrumentation data, follows buckets
@@ -264,6 +265,87 @@ $0:
 .endmacro
 
 
+// Cache hash-related macros and functions
+// %rdx = register holding pointer to class structure
+//   $0 = whether to save registers (rax, rcx)
+//   $1 = register holding pointer to cache_entry structure
+//   $2 = register to store the computed hash into
+// modifies registers: %rax (if $0 == 0), %rcx (if $0 == 0), %rdx, %r10
+.macro ComputeCacheHash
+//.if $0 != 0
+//	push %rax
+//	push %rcx
+//.endif
+//
+//        xorl %r10d, %r10d
+//        call __objc_get_secret_cache_table_ptr
+//
+//        // (class_lo + K[0]) * (class_hi + K[1])
+//        movq %rdx, %rcx
+//        shr $$32, %rcx
+//        addl  (%rax), %edx
+//        addl 4(%rax), %ecx
+//        imul %rcx, %rdx
+//        addq %rdx, %r10
+//
+//        // (name_ptr_lo + K[2]) * (name_ptr_hi + K[3])
+//        movq method_name($1), %rdx
+//        movq %rdx, %rcx
+//        shr $$32, %rcx
+//        addl  8(%rax), %edx
+//        addl 12(%rax), %ecx
+//        imul %rcx, %rdx
+//        addq %rdx, %r10
+//
+//        // (imp_ptr_lo + K[4]) * (imp_ptr_hi + K[5])
+//        movq method_imp($1), %rdx
+//        movq %rdx, %rcx
+//        shr $$32, %rcx
+//        addl 16(%rax), %edx
+//        addl 20(%rax), %ecx
+//        imul %rcx, %rdx
+//        addq %rdx, %r10
+//
+//        // FIXME: tunable shift/table size
+//        shr $$44, %r10
+//        movq 24(%rax, %r10, 8), $2
+//
+//.if $0 != 0
+//	pop %rcx
+//	pop %rax
+//.endif
+.endmacro
+
+// %r11 = pointer to handler
+//   $0 = whether to save registers
+//   $1 = result register
+.macro ComputeForwardHash
+//.if $0 != 0
+//	push %rax
+//	push %rdx
+//.endif
+//
+//        call __objc_get_secret_cache_table_ptr
+//
+//        // (forward_handler_lo + K[2]) * (forward_handler_hi + K[3])
+//	movq %r11, %rdx
+//	movq %r11, %r10
+//        shr $$32, %r10
+//        addl 16(%rax), %edx
+//        addl 20(%rax), %r10d
+//        imul %rdx, %r10
+//
+//        // FIXME: tunable shift/table size
+//        shr $$44, %r10
+//        movq 24(%rax, %r10, 8), $1
+//
+//.if $0 != 0
+//	pop %rdx
+//	pop %rax
+//.endif
+.endmacro
+
+
 /////////////////////////////////////////////////////////////////////
 //
 //
@@ -283,7 +365,7 @@ $0:
 //
 // On exit: (found) MSG_SEND and MSG_SENDSUPER: return imp in eax
 //          (found) CACHE_GET: return method triplet in eax
-//          (not found) jumps to cacheMissLabel
+//          (not found) jumps to cacheMissLabel, TODO(andrei) which register?
 //	
 /////////////////////////////////////////////////////////////////////
 
@@ -327,7 +409,9 @@ LMsgSendProbeCache_$0_$1_$2:
 	addl	$$1, %ebx			// probeCount += 1
 #endif
 	andl	%esi, %edx		// index &= mask
-	movl	buckets(%edi, %edx, 4), %eax	// meth = cache->buckets[index]
+//    shll    $$1, %eax // FIXME: remove this // TODO(andrei)
+	movl	bucket_entry(%edi, %edx, 4), %eax	// meth = cache->buckets[index].e
+//    shrl    $$1, %eax // FIXME: remove this
 
 	testl	%eax, %eax		// check for end of bucket
 	je	LMsgSendCacheMiss_$0_$1_$2	// go to cache miss code
@@ -335,6 +419,8 @@ LMsgSendProbeCache_$0_$1_$2:
 	je	LMsgSendCacheHit_$0_$1_$2	// go handle cache hit
 	addl	$$1, %edx			// bump index ...
 	jmp	LMsgSendProbeCache_$0_$1_$2 // ... and loop
+
+// TODO(andrei): check hash
 
 // not found in cache: restore state and go to callers handler
 LMsgSendCacheMiss_$0_$1_$2:
@@ -504,7 +590,7 @@ LMsgSendHitInstrumentDone_$0_$1_$2:
 // 	  eax = class
 //        (all set by CacheLookup's miss case)
 // 
-// Stack must be at 0xXXXXXXXc on entrance.
+// Stack must be at 0xXXXXXXXc on entrance. // TODO(andrei): we modified this for x86_64
 //
 // On exit:  esp unchanged
 //           imp in eax
@@ -555,6 +641,7 @@ LMsgSendHitInstrumentDone_$0_$1_$2:
 
 LGetMethodMiss:
 // cache miss, return nil
+// TODO(andrei): we popped here for x86_64
 	xorl    %eax, %eax      // zero %eax
 	ret
 
@@ -584,6 +671,7 @@ LGetMethodExit:
 
 LGetImpMiss:
 // cache miss, return nil
+// TODO(andrei): we popped here for x86_64
 	xorl    %eax, %eax      // zero %eax
 	ret
 
@@ -1024,15 +1112,26 @@ _FwdSel: .long 0
 	.align 2
 LUnkSelStr: .ascii "Does not recognize selector %s (while forwarding %s)\0"
 
+	.cstring
+	.align 2
+LForwardHashFailStr: .ascii "Forward handler hash failure\0"
+
 	.data
 	.align 2
 	.private_extern __objc_forward_handler
 __objc_forward_handler:	.long 0
 
+	.private_extern __objc_forward_hash
+__objc_forward_hash:	.quad 0     // TODO(andrei): still 8 bytes hashes?
+
 	.data
 	.align 2
 	.private_extern __objc_forward_stret_handler
 __objc_forward_stret_handler:	.long 0
+
+	.private_extern __objc_forward_stret_hash
+__objc_forward_stret_hash:	.quad 0 // TODO(andrei): still 8 bytes hashes?
+
 
 	STATIC_ENTRY	__objc_msgForward_internal
 	// Method cache version
@@ -1060,7 +1159,11 @@ L__objc_msgForward$pic_base:
 	movl	__objc_forward_handler-L__objc_msgForward$pic_base(%edx),%ecx
 	testl	%ecx, %ecx		// if not NULL
 	je	1f			//   skip to default handler
-	jmp	*%ecx			// call __objc_forward_handler
+
+//   	ComputeForwardHash 1, %r10 // TODO (andrei)
+//	cmp __objc_forward_hash(%rip), %r10
+//	jne LMsgForwardHashFailError
+	jmp	*%ecx			// else call __objc_forward_handler
 1:	
 	// No user handler
 	// Push stack frame
@@ -1099,6 +1202,11 @@ LMsgForwardError:
 	pushl   (self+4)(%ebp)
 	call	___objc_error	// never returns
 
+LMsgForwardHashFailError: // TODO(andrei)
+	// %a1 is already the receiver
+//	leaq	LForwardHashFailStr(%rip), %a2
+	call	___objc_error		// never returns
+
 	END_ENTRY	__objc_msgForward
 
 
@@ -1114,7 +1222,11 @@ L__objc_msgForwardStret$pic_base:
 	movl	__objc_forward_stret_handler-L__objc_msgForwardStret$pic_base(%edx), %ecx
 	testl	%ecx, %ecx		// if not NULL
 	je	1f			//   skip to default handler
-	jmp	*%ecx			// call __objc_forward_stret_handler
+
+//	ComputeForwardHash 1, %r10                      // TODO(andrei)
+//	cmp __objc_forward_stret_hash(%rip), %r10
+//	jne LMsgForwardStretHashFailError
+	jmp	*%ecx			// else call __objc_forward_stret_handler
 1:	
 	// No user handler
 	// Push stack frame
@@ -1153,7 +1265,25 @@ LMsgForwardStretError:
 	pushl   (self_stret+4)(%ebp)
 	call	___objc_error	// never returns
 
+LMsgForwardStretHashFailError:
+	// %a1 is already the receiver
+//	leaq	LForwardHashFailStr(%rip), %a2
+	call    ___objc_error		// never returns
+
 	END_ENTRY	__objc_msgForward_stret
+
+    STATIC_ENTRY __objc_compute_forward_hashes // TODO(andrei)
+	// compute the hashes one by one
+//	movq	__objc_forward_handler(%rip), %r11
+//	ComputeForwardHash 0, %rax
+//	mov %rax, __objc_forward_hash(%rip)
+//
+//	movq	__objc_forward_stret_handler(%rip), %r11
+//	ComputeForwardHash 0, %rax
+//	mov %rax, __objc_forward_stret_hash(%rip)
+
+	ret
+	END_ENTRY
 
 
 	ENTRY _method_invoke
@@ -1184,5 +1314,16 @@ LMsgForwardStretError:
 	ret
 	
 	END_ENTRY __objc_ignored_method
+
+
+    // uint64_t _objc_compute_cache_hash(Class cls, struct cache_entry *e)
+    // FIXME: make sure this isn't exported
+    STATIC_ENTRY __objc_compute_cache_hash // TODO(andrei)
+
+//    movq	%rdi,	%rdx
+//    ComputeCacheHash 0, %rsi, %rax
+    ret
+
+    END_ENTRY __objc_compute_cache_hash
 	
 #endif

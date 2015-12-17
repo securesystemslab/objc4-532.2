@@ -103,7 +103,7 @@ typedef struct {
 
 struct cache_bucket { // [coop-defense] 32bit
     cache_entry *e;
-    uint64_t hash;
+    uint64_t hash; // TODO(andrei): still 8 bytes hashes?
 };
 
 struct objc_cache { // [coop-defense] 32bit

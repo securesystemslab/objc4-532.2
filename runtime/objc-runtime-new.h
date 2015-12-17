@@ -375,7 +375,8 @@ typedef struct class_t {
             fprintf(stderr,
                     "Found corrupted class '%s' at %p\n"
                     "stored hash: %23llu\ncomputed hash: %21llu\n",
-                    getName((class_t*) this), this, hash, h);
+                    "TODO", this, hash, h);
+//                    getName((class_t*) this), this, hash, h); // TODO(yln)!!!
             abort();
         }
     }
