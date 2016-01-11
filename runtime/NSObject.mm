@@ -367,6 +367,13 @@ objc_storeWeak(id *location, id newObj)
     return newObj;
 }
 
+// Just make this symbol available to run on never versions of Mac OSX.
+id
+objc_storeWeakOrNil(id *location, id newObj) {
+    printf("objc_storeWeakOrNil\n");
+    exit(-7);
+}
+
 id
 objc_loadWeakRetained(id *location)
 {
