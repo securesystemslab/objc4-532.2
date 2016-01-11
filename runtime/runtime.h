@@ -360,6 +360,10 @@ OBJC_EXPORT id objc_loadWeak(id *location)
 OBJC_EXPORT id objc_storeWeak(id *location, id obj) 
     __OSX_AVAILABLE_STARTING(__MAC_10_7, __IPHONE_5_0);
 
+// Added by yln.
+OBJC_EXPORT id objc_storeWeakOrNil(id *location, id obj)
+    __OSX_AVAILABLE_STARTING(__MAC_10_7, __IPHONE_5_0);
+
 
 #define _C_ID       '@'
 #define _C_CLASS    '#'
