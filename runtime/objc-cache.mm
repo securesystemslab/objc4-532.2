@@ -101,9 +101,11 @@ typedef struct {
 } cache_entry;
 
 
+typedef unsigned long hash_t; // [coop-defense] 32bit
+
 struct cache_bucket { // [coop-defense] 32bit
     cache_entry *e;
-    uint64_t hash; // TODO(andrei): still 8 bytes hashes?
+    hash_t hash;
 };
 
 struct objc_cache { // [coop-defense] 32bit
@@ -529,7 +531,7 @@ static Cache _cache_expand(Class cls)
     return new_cache;
 }
 
-extern "C" uint64_t _objc_compute_cache_hash(Class cls, cache_entry* e); // [coop-defense]
+extern "C" hash_t _objc_compute_cache_hash(Class cls, cache_entry* e); // [coop-defense]
 
 /***********************************************************************
 * _cache_fill.  Add the specified method to the specified class' cache.

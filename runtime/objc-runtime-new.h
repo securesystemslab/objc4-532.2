@@ -340,11 +340,11 @@ typedef struct class_t {
     Cache cache;
     union { // [coop-defense]: deactivate vtables and use field for hash
         IMP *vtable;
-        uint64_t hash;
+        hash_t hash; // 32 bit support
     };
     uintptr_t data_NEVER_USE;  // class_rw_t * plus custom rr/alloc flags
 
-    uint64_t computeHash() const {
+    hash_t computeHash() const {
         HMAC_MD5_CTX ctx;
         hmac_init(&ctx);
         
@@ -370,11 +370,11 @@ typedef struct class_t {
     }
     void verify_() const {
         assert(this != nullptr);
-        uint64_t h = computeHash();
+        hash_t h = computeHash();
         if (h != hash) {
             fprintf(stderr,
                     "Found corrupted class '%s' at %p\n"
-                    "stored hash: %23llu\ncomputed hash: %21llu\n",
+                    "stored hash: %23lu\ncomputed hash: %21lu\n",
                     "TODO", this, hash, h);
 //                    getName((class_t*) this), this, hash, h); // TODO(yln)!!!
             abort();

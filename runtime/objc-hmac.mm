@@ -21,8 +21,13 @@ void hmac_update(HMAC_MD5_CTX* ctx, const void* ptr, size_t size) {
     _sasl_hmac_md5_update(ctx, (const uint8_t*) ptr, size);
 }
 
-uint64_t hmac_final(HMAC_MD5_CTX* ctx) {
-    uint64_t digest[2]; // 2 * 8 = 16 = HMAC_MD5_SIZE
+hash_t hmac_final(HMAC_MD5_CTX* ctx) {
+    // 16 bytes == HMAC_MD5_SIZE, 64 bit: 2 * 8, 32 bit: 4 * 5
+    hash_t digest[HMAC_MD5_SIZE / sizeof(hash_t)];
     _sasl_hmac_md5_final((uint8_t*) digest, ctx);
+#if __LP64__  // 64 bit
     return digest[0] ^ digest[1];
+#else         // 32 bit
+    return digest[0] ^ digest[1] ^ digest[2] ^ digest[3];
+#endif
 }

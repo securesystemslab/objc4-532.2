@@ -15,8 +15,10 @@
 #include <sasl/md5.h>
 #include <sasl/hmac-md5.h>
 
+typedef unsigned long hash_t;
+
 extern void hmac_init(HMAC_MD5_CTX* ctx);
 extern void hmac_update(HMAC_MD5_CTX* ctx, const void* ptr, size_t size);
-extern uint64_t hmac_final(HMAC_MD5_CTX* ctx);
+extern hash_t hmac_final(HMAC_MD5_CTX* ctx);
 
 #endif /* objc_hmac_h */
