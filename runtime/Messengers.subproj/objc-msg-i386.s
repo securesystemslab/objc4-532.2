@@ -266,83 +266,87 @@ $0:
 
 
 // Cache hash-related macros and functions
-// %rdx = register holding pointer to class structure
-//   $0 = whether to save registers (rax, rcx)
+// %edx = register holding pointer to class structure
+//   $0 = whether to save registers (eax, ecx)
 //   $1 = register holding pointer to cache_entry structure
 //   $2 = register to store the computed hash into
-// modifies registers: %rax (if $0 == 0), %rcx (if $0 == 0), %rdx, %r10
+// modifies registers: %eax (if $0 == 0), %ecx (if $0 == 0), %edi (if $0 == 0), %edx
 .macro ComputeCacheHash
-//.if $0 != 0
-//	push %rax
-//	push %rcx
-//.endif
-//
-//        xorl %r10d, %r10d
-//        call __objc_get_secret_cache_table_ptr
-//
-//        // (class_lo + K[0]) * (class_hi + K[1])
-//        movq %rdx, %rcx
-//        shr $$32, %rcx
-//        addl  (%rax), %edx
-//        addl 4(%rax), %ecx
-//        imul %rcx, %rdx
-//        addq %rdx, %r10
-//
-//        // (name_ptr_lo + K[2]) * (name_ptr_hi + K[3])
-//        movq method_name($1), %rdx
-//        movq %rdx, %rcx
-//        shr $$32, %rcx
-//        addl  8(%rax), %edx
-//        addl 12(%rax), %ecx
-//        imul %rcx, %rdx
-//        addq %rdx, %r10
-//
-//        // (imp_ptr_lo + K[4]) * (imp_ptr_hi + K[5])
-//        movq method_imp($1), %rdx
-//        movq %rdx, %rcx
-//        shr $$32, %rcx
-//        addl 16(%rax), %edx
-//        addl 20(%rax), %ecx
-//        imul %rcx, %rdx
-//        addq %rdx, %r10
-//
-//        // FIXME: tunable shift/table size
-//        shr $$44, %r10
-//        movq 24(%rax, %r10, 8), $2
-//
-//.if $0 != 0
-//	pop %rcx
-//	pop %rax
-//.endif
+.if $0 != 0
+	push %eax
+	push %ecx
+    push %edi
+.endif
+
+    xorl %edi, %edi
+    call __objc_get_secret_cache_table_ptr
+
+    // (class_lo + K[0]) * (class_hi + K[1])
+    movl %edx, %ecx
+    shr $$32, %ecx
+    addl  (%eax), %edx
+    addl 4(%eax), %ecx
+    imul %ecx, %edx
+    addl %edx, %edi
+
+    // (name_ptr_lo + K[2]) * (name_ptr_hi + K[3])
+    movl method_name($1), %edx
+    movl %edx, %ecx
+    shr $$32, %ecx
+    addl  8(%eax), %edx
+    addl 12(%eax), %ecx
+    imul %ecx, %edx
+    addl %edx, %edi
+
+    // (imp_ptr_lo + K[4]) * (imp_ptr_hi + K[5])
+    movl method_imp($1), %edx
+    movl %edx, %ecx
+    shr $$32, %ecx
+    addl 16(%eax), %edx
+    addl 20(%eax), %ecx
+    imul %ecx, %edx
+    addl %edx, %edi
+
+    // FIXME: tunable shift/table size
+    shr $$44, %edi
+    movl 24(%eax, %edi, 4), $2
+
+.if $0 != 0
+    pop %edi
+	pop %ecx
+	pop %eax
+.endif
 .endmacro
 
-// %r11 = pointer to handler
+//   $2 = pointer to handler (%r11 in 64bit)
 //   $0 = whether to save registers
 //   $1 = result register
 .macro ComputeForwardHash
-//.if $0 != 0
-//	push %rax
-//	push %rdx
-//.endif
-//
-//        call __objc_get_secret_cache_table_ptr
-//
-//        // (forward_handler_lo + K[2]) * (forward_handler_hi + K[3])
-//	movq %r11, %rdx
-//	movq %r11, %r10
-//        shr $$32, %r10
-//        addl 16(%rax), %edx
-//        addl 20(%rax), %r10d
-//        imul %rdx, %r10
-//
-//        // FIXME: tunable shift/table size
-//        shr $$44, %r10
-//        movq 24(%rax, %r10, 8), $1
-//
-//.if $0 != 0
-//	pop %rdx
-//	pop %rax
-//.endif
+.if $0 != 0
+	push %eax
+	push %edx
+    push %edi
+.endif
+
+    call __objc_get_secret_cache_table_ptr
+
+    // (forward_handler_lo + K[2]) * (forward_handler_hi + K[3])
+    movl $2, %edx
+    movl $2, %edi
+    shr $$32, %edi
+    addl 16(%eax), %edx
+    addl 20(%eax), %edi
+    imul %edx, %edi
+
+    // FIXME: tunable shift/table size
+    shr $$44, %edi
+    movl 24(%eax, %edi, 8), $1
+
+.if $0 != 0
+    pop %edi
+	pop %edx
+	pop %eax
+.endif
 .endmacro
 
 
@@ -409,9 +413,9 @@ LMsgSendProbeCache_$0_$1_$2:
 	addl	$$1, %ebx			// probeCount += 1
 #endif
 	andl	%esi, %edx		// index &= mask
-//    shll    $$1, %eax // FIXME: remove this // TODO(andrei)
+    shll    $$1, %edx // FIXME: remove this
 	movl	bucket_entry(%edi, %edx, 4), %eax	// meth = cache->buckets[index].e
-//    shrl    $$1, %eax // FIXME: remove this
+    shrl    $$1, %edx // FIXME: remove this
 
 	testl	%eax, %eax		// check for end of bucket
 	je	LMsgSendCacheMiss_$0_$1_$2	// go to cache miss code
@@ -1122,7 +1126,7 @@ LForwardHashFailStr: .ascii "Forward handler hash failure\0"
 __objc_forward_handler:	.long 0
 
 	.private_extern __objc_forward_hash
-__objc_forward_hash:	.quad 0     // TODO(andrei): still 8 bytes hashes?
+__objc_forward_hash:	.long 0
 
 	.data
 	.align 2
@@ -1130,7 +1134,7 @@ __objc_forward_hash:	.quad 0     // TODO(andrei): still 8 bytes hashes?
 __objc_forward_stret_handler:	.long 0
 
 	.private_extern __objc_forward_stret_hash
-__objc_forward_stret_hash:	.quad 0 // TODO(andrei): still 8 bytes hashes?
+__objc_forward_stret_hash:	.long 0
 
 
 	STATIC_ENTRY	__objc_msgForward_internal
@@ -1272,15 +1276,15 @@ LMsgForwardStretHashFailError:
 
 	END_ENTRY	__objc_msgForward_stret
 
-    STATIC_ENTRY __objc_compute_forward_hashes // TODO(andrei)
+    STATIC_ENTRY __objc_compute_forward_hashes // TODO(andrei): replace RIP-relative addressing
 	// compute the hashes one by one
-//	movq	__objc_forward_handler(%rip), %r11
-//	ComputeForwardHash 0, %rax
-//	mov %rax, __objc_forward_hash(%rip)
+//	movl	__objc_forward_handler(%rip), %r11
+//	ComputeForwardHash 0, %eax
+//	movl %eax, __objc_forward_hash(%rip)
 //
-//	movq	__objc_forward_stret_handler(%rip), %r11
-//	ComputeForwardHash 0, %rax
-//	mov %rax, __objc_forward_stret_hash(%rip)
+//	movl	__objc_forward_stret_handler(%rip), %r11
+//	ComputeForwardHash 0, %eax
+//	movl %eax, __objc_forward_stret_hash(%rip)
 
 	ret
 	END_ENTRY
@@ -1316,12 +1320,13 @@ LMsgForwardStretHashFailError:
 	END_ENTRY __objc_ignored_method
 
 
-    // uint64_t _objc_compute_cache_hash(Class cls, struct cache_entry *e)
+    // hash_t _objc_compute_cache_hash(Class cls, struct cache_entry *e)
     // FIXME: make sure this isn't exported
-    STATIC_ENTRY __objc_compute_cache_hash // TODO(andrei)
+    STATIC_ENTRY __objc_compute_cache_hash
 
-//    movq	%rdi,	%rdx
-//    ComputeCacheHash 0, %rsi, %rax
+    movl	4(%esp),	%edx    // get 1. arg(Class cls) of the stack
+    movl    8(%esp),    %esi    // get 2. arg(cache_entry* e) of the stack
+    ComputeCacheHash 0, %esi, %eax
     ret
 
     END_ENTRY __objc_compute_cache_hash
