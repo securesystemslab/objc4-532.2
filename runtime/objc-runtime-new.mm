@@ -2589,8 +2589,6 @@ static void reconcileInstanceVariables(class_t *cls, class_t *supercls) {
     }
 }
 
-static int classCount = 0;
-
 /***********************************************************************
 * realizeClass
 * Performs first-time initialization on class cls, 
@@ -2600,6 +2598,8 @@ static int classCount = 0;
 **********************************************************************/
 static class_t *realizeClass(class_t *cls)
 {
+    static int classCount = 0;
+    
     rwlock_assert_writing(&runtimeLock);
 
     const class_ro_t *ro;
