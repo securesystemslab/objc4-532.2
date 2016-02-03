@@ -2589,6 +2589,8 @@ static void reconcileInstanceVariables(class_t *cls, class_t *supercls) {
     }
 }
 
+static int classCount = 0;
+
 /***********************************************************************
 * realizeClass
 * Performs first-time initialization on class cls, 
@@ -2679,6 +2681,9 @@ static class_t *realizeClass(class_t *cls)
     } else {
         addRealizedMetaclass(cls);
     }
+    
+    classCount++;
+    printf("%d\n", classCount);
 
     return cls;
 }
