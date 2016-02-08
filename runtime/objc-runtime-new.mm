@@ -2941,6 +2941,8 @@ unmap_image(const struct mach_header *mh, intptr_t vmaddr_slide)
 }
 
 
+// TODO(yln): This doesn't add the hash field to the ivar list,
+// which could mess up dependent metadata/routines down the line.
 static void addHash(class_t* cls) {
     class_ro_t* clsData = (class_ro_t*) cls->data();
     const ivar_list_t* ivars = clsData->ivars;
@@ -3050,7 +3052,7 @@ void _read_images(header_info **hList, uint32_t hCount)
         classref_t *classlist = _getObjc2ClassList(hi, &count);
         for (i = 0; i < count; i++) {
             class_t *cls = (class_t *)classlist[i];
-            addHash(cls);
+            addHash(cls); // [coop-objects]
             const char *name = getName(cls);
             
             if (missingWeakSuperclass(cls)) {
@@ -6220,7 +6222,7 @@ static void objc_initializeClassPair_internal(Class superclass_gen, const char *
     } else {
         cls_ro_w->instanceStart = 0;
         meta_ro_w->instanceStart = (uint32_t)sizeof(class_t);
-        cls_ro_w->instanceSize = (uint32_t)sizeof(id);  // just an isa
+        cls_ro_w->instanceSize = (uint32_t)(sizeof(id) + sizeof(uint64_t));  // just an isa + hash [coop-objects]
         meta_ro_w->instanceSize = meta_ro_w->instanceStart;
     }
 
