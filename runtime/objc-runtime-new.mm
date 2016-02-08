@@ -2941,6 +2941,37 @@ unmap_image(const struct mach_header *mh, intptr_t vmaddr_slide)
 }
 
 
+static void addHash(class_t* cls) {
+    class_ro_t* clsData = (class_ro_t*) cls->data();
+    const ivar_list_t* ivars = clsData->ivars;
+    uint32_t hashSize = sizeof(uint64_t);
+    uint32_t ivarFixupStart;
+    
+    if (cls->superclass) {
+        assert (clsData->instanceStart > 0);
+        clsData->instanceStart += hashSize;
+        ivarFixupStart = 0;
+    } else {
+        assert (clsData->instanceStart == 0);
+        if (ivars) {
+            assert (ivars->count > 0);
+            ivar_t* isa = ivar_list_nth(ivars, 0);
+            assert (*(isa->offset) == 0 && strcmp(isa->name, "isa") == 0);
+        } else {
+            printf("Root class without ivars: %s\n", getName(cls));
+        }
+        ivarFixupStart = 1;
+    }
+    
+    clsData->instanceSize += hashSize;
+    
+    if (!ivars) return;
+    
+    for (uint32_t i = ivarFixupStart; i < ivars->count; i++) {
+        ivar_t* v = ivar_list_nth(ivars, i);
+        (*v->offset) += hashSize;
+    }
+}
 
 /***********************************************************************
 * _read_images
@@ -3019,6 +3050,7 @@ void _read_images(header_info **hList, uint32_t hCount)
         classref_t *classlist = _getObjc2ClassList(hi, &count);
         for (i = 0; i < count; i++) {
             class_t *cls = (class_t *)classlist[i];
+            addHash(cls);
             const char *name = getName(cls);
             
             if (missingWeakSuperclass(cls)) {
