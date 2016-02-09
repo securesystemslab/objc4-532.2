@@ -1750,6 +1750,7 @@ LMsgForwardStretHashFailError:
 	// } *id;
         STATIC_ENTRY __objc_protect_instance
 
+	movq	$7,	8(%rdi)	    // Overwrite hash for testing
 	// TODO(andrei)
         ret
 
