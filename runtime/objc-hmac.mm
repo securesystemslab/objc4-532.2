@@ -10,11 +10,16 @@
 
 #include "objc-secrets.h"
 
-void hmac_init(HMAC_MD5_CTX* ctx) {
+static HMAC_MD5_STATE precalc() {
+    HMAC_MD5_STATE state;
     uint64_t secret = get_secret_slow_path(); // TODO(yln): not secure, because secret goes to memory
-    _sasl_hmac_md5_init(ctx, (const uint8_t*) &secret, sizeof(uint64_t));
-    secret = 0;
-    // TODO(yln): we could precalculate intermidate state from key for performance.
+    _sasl_hmac_md5_precalc(&state, (const uint8_t*) &secret, sizeof(uint64_t));
+    return state;
+}
+
+void hmac_init(HMAC_MD5_CTX* ctx) {
+    static HMAC_MD5_STATE state = precalc();
+    _sasl_hmac_md5_import(ctx, &state);
 }
 
 void hmac_update(HMAC_MD5_CTX* ctx, const void* ptr, size_t size) {
