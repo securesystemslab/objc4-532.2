@@ -1739,6 +1739,21 @@ LMsgForwardStretHashFailError:
         ret
 
         END_ENTRY __objc_compute_cache_hash
+
+
+	// void _objc_protect_instance(id obj)
+	// FIXME: make sure this isn't exported
+	//
+	// typedef struct objc_object {
+	//   Class isa;
+	//   uint64_t hash;
+	// } *id;
+        STATIC_ENTRY __objc_protect_instance
+
+	// TODO(andrei)
+        ret
+
+        END_ENTRY __objc_protect_instance
 	
 	
 /********************************************************************

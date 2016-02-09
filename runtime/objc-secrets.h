@@ -14,4 +14,7 @@
 extern void secrets_init();
 extern uint64_t get_secret_slow_path();
 
+// Provided in assembly
+extern "C" void _objc_protect_instance(id obj); // [objects-defense]
+
 #endif /* objc_secrets_h */

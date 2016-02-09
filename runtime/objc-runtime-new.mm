@@ -6628,6 +6628,7 @@ _class_createInstanceFromZone(Class cls, size_t extraBytes, void *zone)
     if (!obj) return nil;
 
     obj->isa = cls;  // need not be object_setClass
+    _objc_protect_instance(obj);    // [objects-defense]
 
     if (_class_hasCxxStructors(cls)) {
         obj = _objc_constructOrFree(cls, obj);
@@ -6739,6 +6740,7 @@ _object_copyFromZone(id oldObj, size_t extraBytes, void *zone)
 
     // fixme this doesn't handle C++ ivars correctly (#4619414)
     objc_memmove_collectable(obj, oldObj, size);
+    _objc_protect_instance(obj);    // [objects-defense]
 
 #if SUPPORT_GC
     if (UseGC)

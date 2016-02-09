@@ -1231,6 +1231,7 @@ _objc_constructInstance(Class cls, void *bytes)
 
     // Set the isa pointer
     obj->isa = cls;  // need not be object_setClass
+    _objc_protect_instance(obj);    // [objects-defense]
 
     // Call C++ constructors, if any.
     if (!object_cxxConstruct(obj)) {
@@ -1310,7 +1311,10 @@ _class_createInstancesFromZone(Class cls, size_t extraBytes, void *zone,
     for (i = 0; i < num_allocated; i++) {
         id obj = results[i];
         if (ctor) obj = _objc_constructOrFree(cls, obj);
-        else if (obj) obj->isa = cls;  // need not be object_setClass
+        else if (obj) {
+            obj->isa = cls;  // need not be object_setClass
+            _objc_protect_instance(obj);    // [objects-defense]
+        }
 
         if (obj) {
             results[i-shift] = obj;
