@@ -151,6 +151,10 @@ _objc_exitPoints:
  *
  ********************************************************************/
 
+// objects (id) extended with has field
+#define obj_isa         0
+#define obj_hash        8
+
 // objc_super parameter to sendSuper
 #define receiver 	0
 #define class 		8
@@ -604,6 +608,15 @@ L_dw_leave_$0:
 	pop %rdx
 	pop %rax
 .endif
+.endmacro
+
+// %rdi = object pointer (id)
+//   $0 = result register
+.macro ComputeInstanceHash
+
+	// TODO(andrei)
+	movq    $$77, $0
+
 .endmacro
 
 /////////////////////////////////////////////////////////////////////
@@ -1660,6 +1673,7 @@ LMsgForwardStretHashFailError:
 
 	END_ENTRY	__objc_msgForward_stret
 
+	// FIXME: make sure this isn't exported
 	STATIC_ENTRY __objc_compute_forward_hashes
 	// compute the hashes one by one
 	movq	__objc_forward_handler(%rip), %r11
@@ -1743,16 +1757,11 @@ LMsgForwardStretHashFailError:
 
 	// void _objc_protect_instance(id obj)
 	// FIXME: make sure this isn't exported
-	//
-	// typedef struct objc_object {
-	//   Class isa;
-	//   uint64_t hash;
-	// } *id;
         STATIC_ENTRY __objc_protect_instance
 
-	movq	$7,	8(%rdi)	    // Overwrite hash for testing
-	// TODO(andrei)
-        ret
+	ComputeInstanceHash %rax
+	movq	%rax,	obj_hash(%rdi)
+	ret
 
         END_ENTRY __objc_protect_instance
 	
