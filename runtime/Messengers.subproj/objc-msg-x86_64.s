@@ -592,7 +592,7 @@ L_dw_leave_$0:
 
         call __objc_get_secret_cache_table_ptr
 
-        // (forward_handler_lo + K[2]) * (forward_handler_hi + K[3])
+        // (forward_handler_lo + K[4]) * (forward_handler_hi + K[5])
 	movq %r11, %rdx
 	movq %r11, %r10
         shr $$32, %r10
@@ -611,11 +611,33 @@ L_dw_leave_$0:
 .endmacro
 
 // %rdi = object pointer (id)
-//   $0 = result register
+// %rax = result register
+// modifies registers: %rcx, %rdx, %r10
 .macro ComputeInstanceHash
 
-	// TODO(andrei)
-	movq    $$77, $0
+	call __objc_get_secret_cache_table_ptr
+
+        // (obj_ptr_lo + K[6]) * (obj_ptr_hi + K[7])
+        movq %rdi, %rdx
+        movq %rdi, %rcx
+        shr $$32, %rcx
+        addl 24(%rax), %edx
+        addl 28(%rax), %ecx
+        imul %rcx, %rdx
+        movq %rdx, %r10
+
+        // (isa_lo + K[8]) * (isa_hi + K[9])
+        movq obj_isa(%rdi), %rdx
+        movq %rdx, %rcx
+        shr $$32, %rcx
+        addl 32(%rax), %edx
+        addl 36(%rax), %ecx
+        imul %rcx, %rdx
+        addq %rdx, %r10
+
+        // FIXME: tunable shift/table size
+        shr $$44, %r10
+        movq 24(%rax, %r10, 8), %rax
 
 .endmacro
 
@@ -1759,7 +1781,7 @@ LMsgForwardStretHashFailError:
 	// FIXME: make sure this isn't exported
         STATIC_ENTRY __objc_protect_instance
 
-	ComputeInstanceHash %rax
+	ComputeInstanceHash
 	movq	%rax,	obj_hash(%rdi)
 	ret
 
