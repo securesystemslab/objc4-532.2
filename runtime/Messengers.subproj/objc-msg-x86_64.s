@@ -610,7 +610,7 @@ L_dw_leave_$0:
 .endif
 .endmacro
 
-// %rdi = object pointer (id)
+//   $0 = object pointer (id)
 // %rax = result register
 // modifies registers: %rcx, %rdx, %r10
 .macro ComputeInstanceHash
@@ -618,8 +618,8 @@ L_dw_leave_$0:
 	call __objc_get_secret_cache_table_ptr
 
         // (obj_ptr_lo + K[6]) * (obj_ptr_hi + K[7])
-        movq %rdi, %rdx
-        movq %rdi, %rcx
+        movq $0, %rdx
+        movq %rdx, %rcx
         shr $$32, %rcx
         addl 24(%rax), %edx
         addl 28(%rax), %ecx
@@ -627,7 +627,7 @@ L_dw_leave_$0:
         movq %rdx, %r10
 
         // (isa_lo + K[8]) * (isa_hi + K[9])
-        movq obj_isa(%rdi), %rdx
+        movq obj_isa($0), %rdx
         movq %rdx, %rcx
         shr $$32, %rcx
         addl 32(%rax), %edx
@@ -881,7 +881,27 @@ LNilTestSlow:
 .endif
 	ret
 .endmacro
-	
+
+
+/////////////////////////////////////////////////////////////////////
+//
+// Verify integrity of object instance
+//
+// Takes:	$0 = NORMAL or FPRET or FP2RET or STRET
+//		%a1 or %a2 (STRET) = receiver
+//
+/////////////////////////////////////////////////////////////////////
+.macro VerifyObjectInstance
+.if $0 != STRET
+	ComputeInstanceHash %a1
+	cmpq	obj_hash(%a1), %rax
+.else
+	ComputeInstanceHash %a2
+	cmpq	obj_hash(%a2), %rax
+.endif
+        jne __objc_trap_corrupted_obj
+.endmacro
+
 
 /********************************************************************
  * Method _cache_getMethod(Class cls, SEL sel, IMP msgForward_internal_imp)
@@ -1781,7 +1801,7 @@ LMsgForwardStretHashFailError:
 	// FIXME: make sure this isn't exported
         STATIC_ENTRY __objc_protect_instance
 
-	ComputeInstanceHash
+	ComputeInstanceHash %rdi
 	movq	%rax,	obj_hash(%rdi)
 	ret
 

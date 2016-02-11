@@ -45,3 +45,10 @@ uint8_t* _objc_get_secret_cache_table_ptr() {
 uint64_t get_secret_slow_path() {
     return ((uint64_t*) randomTable)[7];
 }
+
+extern "C"
+void _objc_trap_corrupted_obj(id obj) {
+    assert(obj != nullptr);
+    fprintf(stderr, "Found corrupted object instance\n");
+    abort();
+}
