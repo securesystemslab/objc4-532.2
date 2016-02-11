@@ -1002,6 +1002,7 @@ __objc_tagged_isa_table:
 	DW_START _objc_msgSend
 
 	NilTest	NORMAL
+	VerifyObjectInstance NORMAL
 
 	GetIsaFast NORMAL		// r11 = self->isa
 	CacheLookup NORMAL, _objc_msgSend  // r11=method, eq set (nonstret fwd)
@@ -1174,6 +1175,7 @@ LCacheMiss:
 	DW_START _objc_msgSend_fpret
 
 	NilTest	FPRET
+	VerifyObjectInstance FPRET
 
 	GetIsaFast FPRET		// r11 = self->isa
 	CacheLookup FPRET, _objc_msgSend_fpret	// r11 = method, eq set (nonstret fwd)
@@ -1249,6 +1251,7 @@ LCacheMiss:
 	DW_START _objc_msgSend_fp2ret
 
 	NilTest	FP2RET
+	VerifyObjectInstance FP2RET
 
 	GetIsaFast FP2RET		// r11 = self->isa
 	CacheLookup FP2RET, _objc_msgSend_fp2ret	// r11 = method, eq set (nonstret fwd)
@@ -1330,6 +1333,7 @@ LCacheMiss:
 	DW_START _objc_msgSend_stret
 
 	NilTest	STRET
+	VerifyObjectInstance STRET
 
 	GetIsaFast STRET		// r11 = self->isa
 	CacheLookup STRET, _objc_msgSend_stret	// r11 = method, ne set (stret fwd)
