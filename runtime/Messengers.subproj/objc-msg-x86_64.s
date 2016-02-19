@@ -567,8 +567,8 @@ L_dw_leave_$0:
         addq %rdx, %r10
 
         // FIXME: tunable shift/table size
-        shr $$44, %r10
-        movq (%rax, %r10, 8), $2
+        shr $$41, %r10
+        movq (%rax, %r10, 1), $2
 
 .if $0 != 0
 	pop %rcx
@@ -596,8 +596,8 @@ L_dw_leave_$0:
         imul %rdx, %r10
 
         // FIXME: tunable shift/table size
-        shr $$44, %r10
-        movq (%rax, %r10, 8), $1
+        shr $$41, %r10
+        movq (%rax, %r10, 1), $1
 
 .if $0 != 0
 	pop %rdx
