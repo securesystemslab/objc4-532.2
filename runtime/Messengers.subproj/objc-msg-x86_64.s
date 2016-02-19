@@ -587,12 +587,12 @@ L_dw_leave_$0:
 
         call __objc_get_secret_cache_table_ptr
 
-        // (forward_handler_lo + K[2]) * (forward_handler_hi + K[3])
+        // (forward_handler_lo + K[6]) * (forward_handler_hi + K[7])
 	movq %r11, %rdx
 	movq %r11, %r10
         shr $$32, %r10
-        addl 16(%rax), %edx
-        addl 20(%rax), %r10d
+        addl 24(%rax), %edx
+        addl 28(%rax), %r10d
         imul %rdx, %r10
 
         // FIXME: tunable shift/table size
