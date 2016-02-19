@@ -11,7 +11,7 @@
 #include "objc-private.h"
 #include <stdlib.h>
 
-#define RANDOM_TABLE_SIZE (6 * 4 + 1048576 * 8) // 1048576 = 2^20
+#define RANDOM_TABLE_SIZE (1048576 * 8) // 1048576 = 2^20 * 8 bytes (8 MB)
 
 static uint8_t* randomTable;
 
