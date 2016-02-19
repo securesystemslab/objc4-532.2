@@ -538,7 +538,6 @@ L_dw_leave_$0:
 	push %rcx
 .endif
 
-        xorl %r10d, %r10d
         call __objc_get_secret_cache_table_ptr
 
         // (class_lo + K[0]) * (class_hi + K[1])
@@ -547,7 +546,7 @@ L_dw_leave_$0:
         addl  (%rax), %edx
         addl 4(%rax), %ecx
         imul %rcx, %rdx
-        addq %rdx, %r10
+        movq %rdx, %r10
 
         // (name_ptr_lo + K[2]) * (name_ptr_hi + K[3])
         movq method_name($1), %rdx
