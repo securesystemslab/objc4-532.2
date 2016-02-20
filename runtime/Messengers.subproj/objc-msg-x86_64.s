@@ -145,8 +145,8 @@ _objc_exitPoints:
 #define FP2RET 2
 
 // Shift offset (depends on random table size)
-// 64 - lg(N) = 64 - 23
-#define SHIFT_BITS  $$41
+// 32 - lg(N) = 32 - 23, we use the upper 23 bits of the lower 32 bit half
+#define SHIFT_BITS  $$9
 
 
 /********************************************************************
@@ -570,7 +570,7 @@ L_dw_leave_$0:
         imul %rcx, %rdx
         addq %rdx, %r10
 
-        shr SHIFT_BITS, %r10
+        shr SHIFT_BITS, %r10d
         movq (%rax, %r10, 1), $2
 
 .if $0 != 0
@@ -598,7 +598,7 @@ L_dw_leave_$0:
         addl 28(%rax), %r10d
         imul %rdx, %r10
 
-        shr SHIFT_BITS, %r10
+        shr SHIFT_BITS, %r10d
         movq (%rax, %r10, 1), $1
 
 .if $0 != 0
