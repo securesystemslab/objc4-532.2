@@ -144,6 +144,10 @@ _objc_exitPoints:
 #define FPRET 1
 #define FP2RET 2
 
+// Shift offset (depends on random table size)
+// 64 - lg(N) = 64 - 23
+#define SHIFT_BITS  $$41
+
 
 /********************************************************************
  *
@@ -566,8 +570,7 @@ L_dw_leave_$0:
         imul %rcx, %rdx
         addq %rdx, %r10
 
-        // FIXME: tunable shift/table size
-        shr $$41, %r10
+        shr SHIFT_BITS, %r10
         movq (%rax, %r10, 1), $2
 
 .if $0 != 0
@@ -595,8 +598,7 @@ L_dw_leave_$0:
         addl 28(%rax), %r10d
         imul %rdx, %r10
 
-        // FIXME: tunable shift/table size
-        shr $$41, %r10
+        shr SHIFT_BITS, %r10
         movq (%rax, %r10, 1), $1
 
 .if $0 != 0
