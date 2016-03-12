@@ -25,7 +25,7 @@
 #define _OBJC_RUNTIME_NEW_H
 
 #include "objc-secrets.h"
-#include "objc-hmac.h"
+#include "siphash-stream.h"
 
 __BEGIN_DECLS
 
@@ -135,10 +135,10 @@ typedef struct method_list_t {
         return *(method_t *)((uint8_t *)&first + i*getEntsize()); 
     }
 
-    void addHash(HMAC_MD5_CTX* ctx) const {
+    void addHash(siphash* state) const {
         assert(2 * sizeof(uint32_t) + sizeof(method_t) == sizeof(method_list_t));
         size_t size = 2 * sizeof(uint32_t) + count * getEntsize();
-        hmac_update(ctx, this, size);
+        sip24_update(state, this, size);
     }
     
     // iterate methods, taking entsize into account
@@ -293,9 +293,9 @@ typedef struct class_ro_t {
     const uint8_t * weakIvarLayout;
     const property_list_t *baseProperties;
 
-    void addHash(HMAC_MD5_CTX* ctx) const {
+    void addHash(siphash* state) const {
         if (baseMethods != nullptr) {
-            baseMethods->addHash(ctx);
+            baseMethods->addHash(state);
         }
     }
 
@@ -317,16 +317,16 @@ typedef struct class_rw_t {
     struct class_t *firstSubclass;
     struct class_t *nextSiblingClass;
 
-    void addHash(HMAC_MD5_CTX* ctx) const {
+    void addHash(siphash* state) const {
         if (method_list == nullptr)
             return;
 
         if (flags & RW_METHOD_ARRAY) {
             for (int i = 0; method_lists[i] != nullptr; i++) {
-                method_lists[i]->addHash(ctx);
+                method_lists[i]->addHash(state);
             }
         } else {
-            method_list->addHash(ctx);
+            method_list->addHash(state);
         }
     }
 } class_rw_t;
@@ -345,24 +345,24 @@ typedef struct class_t {
     uintptr_t data_NEVER_USE;  // class_rw_t * plus custom rr/alloc flags
 
     uint64_t computeHash() const {
-        HMAC_MD5_CTX ctx;
-        hmac_init(&ctx);
+        siphash state;
+        sip24_init(&state, (const sipkey*) get_secret_slow_path());
         
         const class_t* thisPtr = this;
-        hmac_update(&ctx, &thisPtr, sizeof(class_t*)); // this
-        hmac_update(&ctx, this, 2 * sizeof(class_t*)); // isa, superclass
+        sip24_update(&state, &thisPtr, sizeof(class_t*)); // this
+        sip24_update(&state, this, 2 * sizeof(class_t*)); // isa, superclass
         
         assert(data() != nullptr);
         uint32_t flags = data()->flags; // works for class_rw_t and class_ro_t
-        hmac_update(&ctx, &flags, sizeof(uint32_t));
+        sip24_update(&state, &flags, sizeof(uint32_t));
         
         if (flags & RW_REALIZED || flags & RW_FUTURE) { // class_rw_t
-            data()->addHash(&ctx);
+            data()->addHash(&state);
         } else { // class_ro_t
-            ((class_ro_t*) data())->addHash(&ctx);
+            ((class_ro_t*) data())->addHash(&state);
         }
         
-        return hmac_final(&ctx);
+        return sip24_final(&state);
     }
     void protect() {
         assert(this != nullptr);
