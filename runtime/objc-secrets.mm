@@ -42,6 +42,9 @@ uint8_t* _objc_get_secret_cache_table_ptr() {
     return randomTable;
 }
 
-uint64_t get_secret_slow_path() {
-    return ((uint64_t*) randomTable)[7];
+// key 1: bytes  0-15 for fast path (method cache)
+// key 2: bytes 16-31 for forward handlers
+// key 3: bytes 32-47 for slow path
+uint8_t* get_secret_slow_path() {
+    return &(randomTable[32]);
 }
