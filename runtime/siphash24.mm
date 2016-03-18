@@ -166,7 +166,7 @@ int siphash(uint8_t *out, const uint8_t *in, uint64_t inlen, const uint8_t *k) {
 #include "objc-secrets.h"
 
 extern "C"
-uint64_t siphash_cache(uintptr_t cls, uintptr_t sel, uintptr_t imp) {
+uint64_t siphash_cache(uintptr_t imp, uintptr_t sel, uintptr_t cls) {
     uint64_t out;
     uintptr_t in[] = { cls, sel, imp };
     const uint8_t* key = get_secret_cache();
@@ -174,3 +174,4 @@ uint64_t siphash_cache(uintptr_t cls, uintptr_t sel, uintptr_t imp) {
     siphash((uint8_t*) &out, (uint8_t*) in, sizeof(in), key);
     return out;
 }
+
