@@ -540,40 +540,32 @@ L_dw_leave_$0:
 .if $0 != 0
 	push %rax
 	push %rcx
+	push %rdx
+	push %rsi
+	push %rdi
+	push %r8
+	push %r9
+	push %r11
+	push %r12
 .endif
 
-        call __objc_get_secret_cache_table_ptr
+	// cls is in %rdx	    // 3. arg: cls
+	movq method_imp($1), %rdi   // 1. arg: imp
+	movq method_name($1), %rsi  // 2. arg: sel (order matters, because %rsi == $1 in one instantiation)
 
-        // (class_lo + K[0]) * (class_hi + K[1])
-        movq %rdx, %rcx
-        shr $$32, %rcx
-        addl  (%rax), %edx
-        addl 4(%rax), %ecx
-        imul %rcx, %rdx
-        movq %rdx, %r10
+	// uint64_t siphash_cache(uintptr_t imp, uintptr_t sel, uintptr_t cls)
+	call _siphash_cache
 
-        // (name_ptr_lo + K[2]) * (name_ptr_hi + K[3])
-        movq method_name($1), %rdx
-        movq %rdx, %rcx
-        shr $$32, %rcx
-        addl  8(%rax), %edx
-        addl 12(%rax), %ecx
-        imul %rcx, %rdx
-        addq %rdx, %r10
-
-        // (imp_ptr_lo + K[4]) * (imp_ptr_hi + K[5])
-        movq method_imp($1), %rdx
-        movq %rdx, %rcx
-        shr $$32, %rcx
-        addl 16(%rax), %edx
-        addl 20(%rax), %ecx
-        imul %rcx, %rdx
-        addq %rdx, %r10
-
-        shr SHIFT_BITS, %r10d
-        movq (%rax, %r10, 1), $2
+	movq %rax, $2
 
 .if $0 != 0
+	pop %r12
+	pop %r11
+	pop %r9
+	pop %r8
+	pop %rdi
+	pop %rsi
+	pop %rdx
 	pop %rcx
 	pop %rax
 .endif
