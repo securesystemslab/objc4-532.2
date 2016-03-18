@@ -22,6 +22,8 @@
 		5327450D1BD9960800A2E6F0 /* objc-secrets.h in Headers */ = {isa = PBXBuildFile; fileRef = 5327450C1BD9960800A2E6F0 /* objc-secrets.h */; settings = {ASSET_TAGS = (); }; };
 		53F4B2DE1C939B4E004FC5A2 /* siphash-stream.h in Headers */ = {isa = PBXBuildFile; fileRef = 53F4B2DD1C939B4E004FC5A2 /* siphash-stream.h */; settings = {ASSET_TAGS = (); }; };
 		53F4B2DF1C939B4E004FC5A2 /* siphash-stream.h in Headers */ = {isa = PBXBuildFile; fileRef = 53F4B2DD1C939B4E004FC5A2 /* siphash-stream.h */; settings = {ASSET_TAGS = (); }; };
+		53F4B2E11C9B7DCA004FC5A2 /* siphash24.c in Sources */ = {isa = PBXBuildFile; fileRef = 53F4B2E01C9B7DCA004FC5A2 /* siphash24.c */; settings = {ASSET_TAGS = (); }; };
+		53F4B2E21C9B7DCA004FC5A2 /* siphash24.c in Sources */ = {isa = PBXBuildFile; fileRef = 53F4B2E01C9B7DCA004FC5A2 /* siphash24.c */; settings = {ASSET_TAGS = (); }; };
 		830F2A740D737FB800392440 /* objc-msg-arm.s in Sources */ = {isa = PBXBuildFile; fileRef = 830F2A690D737FB800392440 /* objc-msg-arm.s */; };
 		830F2A750D737FB900392440 /* objc-msg-i386.s in Sources */ = {isa = PBXBuildFile; fileRef = 830F2A6A0D737FB800392440 /* objc-msg-i386.s */; };
 		830F2A7D0D737FBB00392440 /* objc-msg-x86_64.s in Sources */ = {isa = PBXBuildFile; fileRef = 830F2A720D737FB800392440 /* objc-msg-x86_64.s */; };
@@ -256,6 +258,7 @@
 		532745091BD995CE00A2E6F0 /* objc-secrets.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = "objc-secrets.mm"; path = "runtime/objc-secrets.mm"; sourceTree = "<group>"; };
 		5327450C1BD9960800A2E6F0 /* objc-secrets.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "objc-secrets.h"; path = "runtime/objc-secrets.h"; sourceTree = "<group>"; };
 		53F4B2DD1C939B4E004FC5A2 /* siphash-stream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "siphash-stream.h"; path = "runtime/siphash-stream.h"; sourceTree = "<group>"; };
+		53F4B2E01C9B7DCA004FC5A2 /* siphash24.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = siphash24.c; path = runtime/siphash24.c; sourceTree = "<group>"; };
 		830F2A690D737FB800392440 /* objc-msg-arm.s */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.asm; name = "objc-msg-arm.s"; path = "runtime/Messengers.subproj/objc-msg-arm.s"; sourceTree = "<group>"; };
 		830F2A6A0D737FB800392440 /* objc-msg-i386.s */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.asm; name = "objc-msg-i386.s"; path = "runtime/Messengers.subproj/objc-msg-i386.s"; sourceTree = "<group>"; };
 		830F2A720D737FB800392440 /* objc-msg-x86_64.s */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.asm; name = "objc-msg-x86_64.s"; path = "runtime/Messengers.subproj/objc-msg-x86_64.s"; sourceTree = "<group>"; tabWidth = 8; usesTabs = 1; };
@@ -437,6 +440,7 @@
 				838485EB0D6D68A200CEA253 /* objc-typeencoding.mm */,
 				39ABD72012F0B61800D1054C /* objc-weak.mm */,
 				838486190D6D68A800CEA253 /* Protocol.mm */,
+				53F4B2E01C9B7DCA004FC5A2 /* siphash24.c */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -969,6 +973,7 @@
 				39ABD72612F0B61800D1054C /* objc-weak.mm in Sources */,
 				9672F7EF14D5F488007CEC96 /* NSObject.mm in Sources */,
 				83725F4C14CA5C210014370E /* objc-opt.mm in Sources */,
+				53F4B2E21C9B7DCA004FC5A2 /* siphash24.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1010,6 +1015,7 @@
 				87BB4EA70EC39854005D08E1 /* objc-probes.d in Sources */,
 				BC07A0110EF72D9C0014EC61 /* objc-auto-dump.m in Sources */,
 				83BE02E40FCCB23400661494 /* objc-file-old.m in Sources */,
+				53F4B2E11C9B7DCA004FC5A2 /* siphash24.c in Sources */,
 				E8923DA1116AB2820071B552 /* a1a2-blocktramps-i386.s in Sources */,
 				E8923DA2116AB2820071B552 /* a1a2-blocktramps-x86_64.s in Sources */,
 				E8923DA3116AB2820071B552 /* a2a3-blocktramps-i386.s in Sources */,
