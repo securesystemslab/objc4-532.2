@@ -37,14 +37,17 @@ void secrets_init() {
     arc4random_buf(randomTable, RANDOM_TABLE_SIZE);
 }
 
-extern "C"
-uint8_t* _objc_get_secret_cache_table_ptr() {
-    return randomTable;
-}
 
+// 16 bytes per key
 // key 1: bytes  0-15 for fast path (method cache)
 // key 2: bytes 16-31 for forward handlers
 // key 3: bytes 32-47 for slow path
-uint8_t* get_secret_slow_path() {
-    return &(randomTable[32]);
+
+uint8_t* get_secret_cache()     { return randomTable; }
+uint8_t* get_secret_handlers()  { return &(randomTable[16]); }
+uint8_t* get_secret_slow_path() { return &(randomTable[32]); }
+
+extern "C"
+uint8_t* _objc_get_secret_cache_table_ptr() {
+    return randomTable;
 }
