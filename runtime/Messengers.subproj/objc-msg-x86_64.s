@@ -535,18 +535,16 @@ L_dw_leave_$0:
 //   $0 = whether to save registers (rax, rcx)
 //   $1 = register holding pointer to cache_entry structure
 //   $2 = register to store the computed hash into
-// modifies registers: %rax (if $0 == 0), %rcx (if $0 == 0), %rdx, %r10
+// modifies registers: YES
 .macro ComputeCacheHash
 .if $0 != 0
 	push %rax
 	push %rcx
-	push %rdx
 	push %rsi
 	push %rdi
 	push %r8
 	push %r9
 	push %r11
-	push %r12
 .endif
 
 	// cls is in %rdx	    // 3. arg: cls
@@ -559,13 +557,11 @@ L_dw_leave_$0:
 	movq %rax, $2
 
 .if $0 != 0
-	pop %r12
 	pop %r11
 	pop %r9
 	pop %r8
 	pop %rdi
 	pop %rsi
-	pop %rdx
 	pop %rcx
 	pop %rax
 .endif
