@@ -144,11 +144,6 @@ _objc_exitPoints:
 #define FPRET 1
 #define FP2RET 2
 
-// Shift offset (depends on random table size)
-// 32 - lg(N) = 32 - 23, we use the upper 23 bits of the lower 32 bit half
-#define SHIFT_BITS  $$9
-
-
 /********************************************************************
  *
  * Structure definitions.
