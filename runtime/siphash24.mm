@@ -175,3 +175,13 @@ uint64_t siphash_cache(uintptr_t imp, uintptr_t sel, uintptr_t cls) {
     return out;
 }
 
+extern "C"
+uint64_t siphash_handler(uintptr_t handler) {
+    uint64_t out;
+    uintptr_t in = handler;
+    const uint8_t* key = get_secret_handlers();
+    
+    siphash((uint8_t*) &out, (uint8_t*) &in, sizeof(in), key);
+    return out;
+}
+

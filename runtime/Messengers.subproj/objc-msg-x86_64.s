@@ -574,22 +574,28 @@ L_dw_leave_$0:
 .if $0 != 0
 	push %rax
 	push %rdx
+	push %rcx
+	push %rsi
+	push %rdi
+	push %r8
+	push %r9
+	push %r11
 .endif
 
-        call __objc_get_secret_cache_table_ptr
+	movq %r11, %rdi	    // 1. arg: handler
 
-        // (forward_handler_lo + K[6]) * (forward_handler_hi + K[7])
-	movq %r11, %rdx
-	movq %r11, %r10
-        shr $$32, %r10
-        addl 24(%rax), %edx
-        addl 28(%rax), %r10d
-        imul %rdx, %r10
+	// uint64_t siphash_handler(uintptr_t handler)
+	call _siphash_handler
 
-        shr SHIFT_BITS, %r10d
-        movq (%rax, %r10, 1), $1
+	movq %rax, $1
 
 .if $0 != 0
+	pop %r11
+	pop %r9
+	pop %r8
+	pop %rdi
+	pop %rsi
+	pop %rcx
 	pop %rdx
 	pop %rax
 .endif
