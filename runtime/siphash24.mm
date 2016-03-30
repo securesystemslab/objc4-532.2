@@ -74,6 +74,8 @@
 #define TRACE
 #endif
 
+//__attribute__((always_inline)) // crashes, if used
+static inline // only a hint, doesn't really inline
 int siphash(uint8_t *out, const uint8_t *in, uint64_t inlen, const uint8_t *k) {
   /* "somepseudorandomlygeneratedbytes" */
   uint64_t v0 = 0x736f6d6570736575ULL;

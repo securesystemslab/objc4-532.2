@@ -534,11 +534,14 @@ L_dw_leave_$0:
 .macro ComputeCacheHash
 .if $0 != 0
 	push %rax
+//	push %rbx   // callee-saved
 	push %rcx
+//	push %rdx   // input: not preserved
 	push %rsi
 	push %rdi
 	push %r8
 	push %r9
+//	push %r10   // temporary
 	push %r11
 .endif
 
@@ -553,11 +556,14 @@ L_dw_leave_$0:
 
 .if $0 != 0
 	pop %r11
+//	pop %r10    // temporary
 	pop %r9
 	pop %r8
 	pop %rdi
 	pop %rsi
+//	pop %rdx    // input: not preserved
 	pop %rcx
+//	pop %rbx    // callee-saved
 	pop %rax
 .endif
 .endmacro
