@@ -125,6 +125,7 @@ static INLINE V2x64U LoadFinalPacket64(const uint8_t* bytes,
 
 }  // namespace
 
+static inline
 uint64_t SipHash(const uint64_t key[2], const uint8_t* bytes,
                  const uint64_t size) {
   SipHashState state(key);
@@ -150,4 +151,22 @@ uint64_t ReduceSipTreeHash(const uint64_t key[2], const uint64_t hashes[4]) {
   }
 
   return state.Finalize();
+}
+
+#include "objc-secrets.h"
+
+extern "C"
+uint64_t siphash_cache(uintptr_t imp, uintptr_t sel, uintptr_t cls) {
+    uintptr_t in[] = { cls, sel, imp };
+    const uint8_t* key = get_secret_cache();
+    
+    return SipHash((uint64_t*) key, (uint8_t*) in, sizeof(in));
+}
+
+extern "C"
+uint64_t siphash_handler(uintptr_t handler) {
+    uintptr_t in = handler;
+    const uint8_t* key = get_secret_handlers();
+    
+    return SipHash((uint64_t*) key, (uint8_t*) &in, sizeof(in));
 }
