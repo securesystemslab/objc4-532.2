@@ -20,6 +20,12 @@
 		5327450A1BD995CE00A2E6F0 /* objc-secrets.mm in Sources */ = {isa = PBXBuildFile; fileRef = 532745091BD995CE00A2E6F0 /* objc-secrets.mm */; settings = {ASSET_TAGS = (); }; };
 		5327450B1BD995CE00A2E6F0 /* objc-secrets.mm in Sources */ = {isa = PBXBuildFile; fileRef = 532745091BD995CE00A2E6F0 /* objc-secrets.mm */; settings = {ASSET_TAGS = (); }; };
 		5327450D1BD9960800A2E6F0 /* objc-secrets.h in Headers */ = {isa = PBXBuildFile; fileRef = 5327450C1BD9960800A2E6F0 /* objc-secrets.h */; settings = {ASSET_TAGS = (); }; };
+		532D8E351CB5DC6700603BA2 /* sip_hash.cc in Sources */ = {isa = PBXBuildFile; fileRef = 532D8E341CB5DC6700603BA2 /* sip_hash.cc */; settings = {ASSET_TAGS = (); COMPILER_FLAGS = "-std=c++11 -mavx2"; }; };
+		532D8E361CB5DC6700603BA2 /* sip_hash.cc in Sources */ = {isa = PBXBuildFile; fileRef = 532D8E341CB5DC6700603BA2 /* sip_hash.cc */; settings = {ASSET_TAGS = (); }; };
+		532D8E381CB5DC8900603BA2 /* vec.h in Headers */ = {isa = PBXBuildFile; fileRef = 532D8E371CB5DC8900603BA2 /* vec.h */; settings = {ASSET_TAGS = (); }; };
+		532D8E391CB5DC8900603BA2 /* vec.h in Headers */ = {isa = PBXBuildFile; fileRef = 532D8E371CB5DC8900603BA2 /* vec.h */; settings = {ASSET_TAGS = (); }; };
+		532D8E3B1CB5DD1B00603BA2 /* code_annotation.h in Headers */ = {isa = PBXBuildFile; fileRef = 532D8E3A1CB5DD1B00603BA2 /* code_annotation.h */; settings = {ASSET_TAGS = (); }; };
+		532D8E3C1CB5DD1B00603BA2 /* code_annotation.h in Headers */ = {isa = PBXBuildFile; fileRef = 532D8E3A1CB5DD1B00603BA2 /* code_annotation.h */; settings = {ASSET_TAGS = (); }; };
 		53F4B2DE1C939B4E004FC5A2 /* siphash-stream.h in Headers */ = {isa = PBXBuildFile; fileRef = 53F4B2DD1C939B4E004FC5A2 /* siphash-stream.h */; settings = {ASSET_TAGS = (); }; };
 		53F4B2DF1C939B4E004FC5A2 /* siphash-stream.h in Headers */ = {isa = PBXBuildFile; fileRef = 53F4B2DD1C939B4E004FC5A2 /* siphash-stream.h */; settings = {ASSET_TAGS = (); }; };
 		53F4B2E11C9B7DCA004FC5A2 /* siphash24.mm in Sources */ = {isa = PBXBuildFile; fileRef = 53F4B2E01C9B7DCA004FC5A2 /* siphash24.mm */; settings = {ASSET_TAGS = (); }; };
@@ -257,6 +263,9 @@
 		513A037819B4B13100448729 /* vproc_priv.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = vproc_priv.h; sourceTree = "<group>"; };
 		532745091BD995CE00A2E6F0 /* objc-secrets.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = "objc-secrets.mm"; path = "runtime/objc-secrets.mm"; sourceTree = "<group>"; };
 		5327450C1BD9960800A2E6F0 /* objc-secrets.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "objc-secrets.h"; path = "runtime/objc-secrets.h"; sourceTree = "<group>"; };
+		532D8E341CB5DC6700603BA2 /* sip_hash.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sip_hash.cc; path = runtime/sip_hash.cc; sourceTree = "<group>"; };
+		532D8E371CB5DC8900603BA2 /* vec.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vec.h; path = runtime/vec.h; sourceTree = "<group>"; };
+		532D8E3A1CB5DD1B00603BA2 /* code_annotation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = code_annotation.h; path = runtime/code_annotation.h; sourceTree = "<group>"; };
 		53F4B2DD1C939B4E004FC5A2 /* siphash-stream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "siphash-stream.h"; path = "runtime/siphash-stream.h"; sourceTree = "<group>"; };
 		53F4B2E01C9B7DCA004FC5A2 /* siphash24.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = siphash24.mm; path = runtime/siphash24.mm; sourceTree = "<group>"; };
 		830F2A690D737FB800392440 /* objc-msg-arm.s */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.asm; name = "objc-msg-arm.s"; path = "runtime/Messengers.subproj/objc-msg-arm.s"; sourceTree = "<group>"; };
@@ -440,6 +449,7 @@
 				838485EB0D6D68A200CEA253 /* objc-typeencoding.mm */,
 				39ABD72012F0B61800D1054C /* objc-weak.mm */,
 				838486190D6D68A800CEA253 /* Protocol.mm */,
+				532D8E341CB5DC6700603BA2 /* sip_hash.cc */,
 				53F4B2E01C9B7DCA004FC5A2 /* siphash24.mm */,
 			);
 			name = Source;
@@ -648,6 +658,7 @@
 		8384862A0D6D6ABC00CEA253 /* Project Headers */ = {
 			isa = PBXGroup;
 			children = (
+				532D8E3A1CB5DD1B00603BA2 /* code_annotation.h */,
 				830F2A920D73876100392440 /* objc-accessors.h */,
 				838485CF0D6D68A200CEA253 /* objc-config.h */,
 				83BE02E50FCCB24D00661494 /* objc-file-old.h */,
@@ -663,6 +674,7 @@
 				838485E50D6D68A200CEA253 /* objc-sel-set.h */,
 				39ABD71F12F0B61800D1054C /* objc-weak.h */,
 				53F4B2DD1C939B4E004FC5A2 /* siphash-stream.h */,
+				532D8E371CB5DC8900603BA2 /* vec.h */,
 			);
 			name = "Project Headers";
 			sourceTree = "<group>";
@@ -683,6 +695,7 @@
 				83E50CF30FF19E8200D74C19 /* objc-accessors.h in Headers */,
 				83E50CDD0FF19E8200D74C19 /* objc-api.h in Headers */,
 				83E50CDE0FF19E8200D74C19 /* objc-auto.h in Headers */,
+				532D8E391CB5DC8900603BA2 /* vec.h in Headers */,
 				83E50CDF0FF19E8200D74C19 /* objc-auto-dump.h in Headers */,
 				83E50CE00FF19E8200D74C19 /* objc-class.h in Headers */,
 				83E50CE10FF19E8200D74C19 /* objc-config.h in Headers */,
@@ -691,6 +704,7 @@
 				83E57598121E8A1600295464 /* objc-file.h in Headers */,
 				83E50CF70FF19E8200D74C19 /* objc-gdb.h in Headers */,
 				83E50CE30FF19E8200D74C19 /* objc-initialize.h in Headers */,
+				532D8E3C1CB5DD1B00603BA2 /* code_annotation.h in Headers */,
 				530032951BCC51E000CD12D1 /* (null) in Headers */,
 				83E50CF80FF19E8200D74C19 /* objc-internal.h in Headers */,
 				83E50CE40FF19E8200D74C19 /* objc-load.h in Headers */,
@@ -725,6 +739,7 @@
 				830F2A940D73876100392440 /* objc-accessors.h in Headers */,
 				838485EF0D6D68A200CEA253 /* objc-api.h in Headers */,
 				BC07A00C0EF72D360014EC61 /* objc-auto-dump.h in Headers */,
+				532D8E381CB5DC8900603BA2 /* vec.h in Headers */,
 				838485F00D6D68A200CEA253 /* objc-auto.h in Headers */,
 				838485F40D6D68A200CEA253 /* objc-class.h in Headers */,
 				838485F60D6D68A200CEA253 /* objc-config.h in Headers */,
@@ -733,6 +748,7 @@
 				83BE02E90FCCB24D00661494 /* objc-file.h in Headers */,
 				834266D80E665A8B002E4DA2 /* objc-gdb.h in Headers */,
 				838485FB0D6D68A200CEA253 /* objc-initialize.h in Headers */,
+				532D8E3B1CB5DD1B00603BA2 /* code_annotation.h in Headers */,
 				83112ED40F00599600A5FBAF /* objc-internal.h in Headers */,
 				838485FE0D6D68A200CEA253 /* objc-load.h in Headers */,
 				838486000D6D68A200CEA253 /* objc-loadmethod.h in Headers */,
@@ -935,6 +951,7 @@
 				8383A3AF122600FB009290B8 /* maptable.mm in Sources */,
 				8383A3B0122600FB009290B8 /* objc-accessors.mm in Sources */,
 				8383A3B1122600FB009290B8 /* objc-auto.m in Sources */,
+				532D8E361CB5DC6700603BA2 /* sip_hash.cc in Sources */,
 				8383A3B2122600FB009290B8 /* objc-auto-dump.m in Sources */,
 				8383A3B3122600FB009290B8 /* objc-block-trampolines.mm in Sources */,
 				8383A3B4122600FB009290B8 /* objc-cache.mm in Sources */,
@@ -1023,6 +1040,7 @@
 				E8923DA5116AB2820071B552 /* objc-block-trampolines.mm in Sources */,
 				83B1A8BE0FF1AC0D0019EA5B /* objc-msg-simulator-i386.s in Sources */,
 				83EB007B121C9EC200B92C16 /* objc-sel-table.s in Sources */,
+				532D8E351CB5DC6700603BA2 /* sip_hash.cc in Sources */,
 				8383A3A3122600E9009290B8 /* a1a2-blocktramps-arm.s in Sources */,
 				8383A3A4122600E9009290B8 /* a2a3-blocktramps-arm.s in Sources */,
 				399BC72E1224831B007FBDF0 /* objc-externalref.mm in Sources */,
