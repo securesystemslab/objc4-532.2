@@ -96,6 +96,15 @@
 #   endif
 #endif
 
+/* OBJC_SWIFT_UNAVAILABLE: unavailable in Swift */
+#if !defined(OBJC_SWIFT_UNAVAILABLE)
+#   if __has_feature(attribute_availability_swift)
+#       define OBJC_SWIFT_UNAVAILABLE(_msg) __attribute__((availability(swift, unavailable, message=_msg)))
+#   else
+#       define OBJC_SWIFT_UNAVAILABLE(_msg)
+#   endif
+#endif
+
 #if !defined(OBJC_HIDE_64)
 /* OBJC_ARM64_UNAVAILABLE: unavailable on arm64 (i.e. stret dispatch) */
 #if !defined(OBJC_ARM64_UNAVAILABLE)
